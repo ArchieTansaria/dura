@@ -1,0 +1,28 @@
+{
+  "name": "DURA",
+  "version": "1.0.0",
+  "description": "Dependency Update Risk Analyzer - Apify Actor",
+  "main": "main.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "keywords": [
+    "dependencies",
+    "npm",
+    "risk",
+    "analyzer",
+    "apify",
+    "actor"
+  ],
+  "author": "",
+  "license": "MIT License",
+  "dependencies": {
+    "apify": "^3.0.0",
+    "crawlee": "^3.6.1",
+    "playwright": "^1.40.0",
+    "semver": "^7.6.0",
+    "node-fetch": "^2.6.7"
+  }
+}
+

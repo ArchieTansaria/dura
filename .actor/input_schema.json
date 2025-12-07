@@ -1,0 +1,22 @@
+{
+  "title": "DURA Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "repoUrl": {
+      "title": "GitHub Repository URL",
+      "type": "string",
+      "description": "The public GitHub repository URL to analyze (e.g., https://github.com/expressjs/express)",
+      "editor": "textfield"
+    },
+    "branch": {
+      "title": "Git Branch",
+      "type": "string",
+      "description": "The git branch to analyze (defaults to 'main' if not specified)",
+      "default": "main",
+      "editor": "textfield"
+    }
+  },
+  "required": ["repoUrl"]
+}
+

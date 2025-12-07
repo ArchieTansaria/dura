@@ -1,0 +1,11 @@
+{
+	"actorSpecification": 1,
+	"environmentVariables": {
+		"NODE_ENV": "production"
+	},
+	"name": "DURA",
+	"version": "0.0.1",
+	"buildTag": "latest",
+	"dockerfile": false,
+	"baseDockerImage": "apify/actor-node-playwright:latest"
+}
