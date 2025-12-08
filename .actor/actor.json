@@ -3,9 +3,12 @@
 	"environmentVariables": {
 		"NODE_ENV": "production"
 	},
-	"name": "DURA",
+	"name": "artistic_seal/dura",
+	"title": "DURA",
+	"id": "nyTY6mDm6Lu0q06zQ",
 	"version": "0.0.1",
 	"buildTag": "latest",
 	"dockerfile": false,
-	"baseDockerImage": "apify/actor-node-playwright:latest"
+	"baseDockerImage": "apify/actor-node-playwright:latest",
+	"output": "./output_schema.json"
 }

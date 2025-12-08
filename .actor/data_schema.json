@@ -1,0 +1,66 @@
+{
+  "title": "DURA Output Schema",
+  "description": "Defines the structure of dependency risk analysis results returned by the DURA Actor.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "The name of the npm package being analyzed."
+      },
+      "currentVersion": {
+        "type": "string",
+        "description": "Version range specified in the target repository's package.json."
+      },
+      "latestVersion": {
+        "type": "string",
+        "description": "Latest version available on the npm registry."
+      },
+      "diff": {
+        "type": "string",
+        "enum": ["major", "minor", "patch", "unknown"],
+        "description": "Semantic version difference between current and latest version."
+      },
+      "risk": {
+        "type": "object",
+        "properties": {
+          "score": {
+            "type": "number",
+            "description": "Numeric representation of update risk."
+          },
+          "level": {
+            "type": "string",
+            "enum": ["low", "medium", "high"],
+            "description": "Risk category describing severity."
+          }
+        }
+      },
+      "repoUrl": {
+        "type": "string",
+        "description": "GitHub repository of the dependency, if detected."
+      },
+      "breaking": {
+        "type": "boolean",
+        "description": "Whether release notes for the dependency contain breaking change indicators."
+      },
+      "breakingKeywords": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "List of matched breaking change keywords from GitHub releases."
+      },
+      "releaseNotesSnippet": {
+        "type": "string",
+        "description": "First 500 characters of extracted release notes used in analysis."
+      }
+    },
+    "required": [
+      "name",
+      "currentVersion",
+      "latestVersion",
+      "diff",
+      "risk",
+      "breaking"
+    ]
+  }
+}
