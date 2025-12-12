@@ -1,9 +1,8 @@
-/**
- * Fetches package.json from a GitHub repository
- */
 
-const fetch = require("node-fetch");
-const { logStep } = require("./utils");
+//Fetches package.json from a GitHub repository
+
+// const fetch = require("node-fetch");
+const { logStep } = require("../utils/logger");
 
 /**
  * Parses a GitHub URL to extract owner and repo
@@ -48,9 +47,8 @@ async function tryBranch(owner, repo, branch) {
   return null;
 }
 
-/**
- * Gets default branch using GitHub API
- */
+
+// Gets default branch using GitHub API
 async function getDefaultBranch(owner, repo) {
   const apiUrl = `https://api.github.com/repos/${owner}/${repo}`;
   logStep(`Fetching default branch from ${apiUrl}`);
@@ -96,6 +94,7 @@ async function fetchPackageJson(repoUrl) {
   throw new Error(`❌ package.json not found in main, master, or default branch for ${owner}/${repo}`);
 }
 
+//for testing
 if (require.main === module) {
   fetchPackageJson("https://github.com/vercel/next.js")
     .then(console.log)
@@ -104,5 +103,6 @@ if (require.main === module) {
 
 module.exports = {
   fetchPackageJson,
-  parseGitHubUrl
+  parseGitHubUrl,
+  tryBranch
 };

@@ -10,5 +10,8 @@
 	"buildTag": "latest",
 	"dockerfile": false,
 	"baseDockerImage": "apify/actor-node-playwright:latest",
-	"output": "./output_schema.json"
+	"output": "./output_schema.json",
+	"storages": {
+		"dataset": "./data_schema.json"
+	}
 }

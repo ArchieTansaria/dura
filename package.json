@@ -7,13 +7,13 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "archie tansaria",
   "license": "MIT License",
-  "description": "",
+  "description": "Dependency Update Risk Analyzer",
   "dependencies": {
-    "apify": "^3.5.2",
     "crawlee": "^3.15.3",
     "node-fetch": "^3.3.2",
+    "playwright": "^1.57.0",
     "semver": "^7.7.3"
   }
 }

@@ -1,8 +1,7 @@
-/**
- * Fetches package information from npm registry
- */
 
-const fetch = require("node-fetch");
+// Fetches package information from npm registry
+
+// const fetch = require("node-fetch");
 
 /**
  * Fetches package metadata from npm registry
@@ -10,7 +9,7 @@ const fetch = require("node-fetch");
  * @returns {Promise<Object>} - Parsed JSON from npm registry
  */
 async function fetchNpmInfo(name) {
-  // Encode scoped packages properly (e.g., @types/node -> @types%2Fnode)
+  // Encode scoped packages properly
   const encodedName = encodeURIComponent(name);
   const url = `https://registry.npmjs.org/${encodedName}`;
   

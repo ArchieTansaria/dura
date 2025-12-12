@@ -1,6 +1,5 @@
-/**
- * Extracts dependencies from package.json
- */
+
+// Extracts dependencies from package.json
 
 /**
  * Gets all dependencies from package.json
@@ -21,6 +20,8 @@ function extractDependencies(pkgJson, includeDev = true) {
       });
     }
   }
+
+  // console.log(deps);
   
   // Process dev dependencies
   if (includeDev && pkgJson.devDependencies && typeof pkgJson.devDependencies === "object") {
@@ -35,6 +36,29 @@ function extractDependencies(pkgJson, includeDev = true) {
   
   return deps;
 }
+
+// for testing
+
+// extractDependencies({
+//   "name": "dura",
+//   "version": "1.0.0",
+//   "main": "main.js",
+//   "scripts": {
+//     "start": "node main.js",
+//     "test": "echo \"Error: no test specified\" && exit 1"
+//   },
+//   "keywords": [],
+//   "author": "archie tansaria",
+//   "license": "MIT License",
+//   "description": "Dependency Update Risk Analyzer",
+//   "dependencies": {
+//     "crawlee": "^3.15.3",
+//     "node-fetch": "^3.3.2",
+//     "playwright": "^1.57.0",
+//     "semver": "^7.7.3"
+//   }
+// }
+// , true);
 
 module.exports = {
   extractDependencies

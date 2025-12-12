@@ -1,6 +1,5 @@
-/**
- * Compares semantic versions to determine the difference
- */
+
+// Compares semantic versions to determine the difference
 
 const semver = require("semver");
 

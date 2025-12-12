@@ -1,6 +1,4 @@
-/**
- * Computes risk scores based on semantic version differences
- */
+//Computes risk scores based on semantic version differences
 
 /**
  * Computes risk score and level based on version difference and breaking changes

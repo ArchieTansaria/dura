@@ -1,6 +1,5 @@
-/**
- * Utility functions for DURA
- */
+
+// Utility functions for DURA
 
 function logStep(msg) {
   console.log(`[DURA] ${msg}`);

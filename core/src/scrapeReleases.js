@@ -1,108 +1,102 @@
-const { PlaywrightCrawler } = require("crawlee");
-const { logStep } = require("./utils");
+const { PlaywrightCrawler } = require('crawlee');
 
-function normalizeGitHubUrl(repoUrl) {
-  if (!repoUrl) return null;
-
-  let cleaned = repoUrl
-    .replace(/^git\+/, "")
-    .replace(/^git:\/\//, "")
-    .replace(/\.git$/, "")
-    .replace(/\/$/, "");
-
-  if (!cleaned.startsWith("http://") && !cleaned.startsWith("https://")) {
-    if (cleaned.includes("github.com")) cleaned = "https://" + cleaned;
-    else return null;
+function normalizeGitHubUrl(url) {
+  if (!url || typeof url !== 'string') return '';
+  let clean = url.trim();
+  if (clean.startsWith('git+')) {
+    clean = clean.slice(4);
   }
-
-  cleaned = cleaned.replace(/^http:\/\//, "https://");
-
-  if (!cleaned.match(/^https:\/\/github\.com\/[^\/]+\/[^\/]+/)) return null;
-
-  return cleaned;
+  if (clean.startsWith('git@github.com:')) {
+    clean = clean.replace('git@github.com:', 'https://github.com/');
+  }
+  if (clean.endsWith('.git')) {
+    clean = clean.slice(0, -4);
+  }
+  return clean.replace(/\/+$/, '');
 }
 
 async function scrapeReleases(repoUrl) {
-  const normalizedUrl = normalizeGitHubUrl(repoUrl);
+  const baseUrl = normalizeGitHubUrl(repoUrl);
 
-  if (!normalizedUrl) {
+  if (!baseUrl) {
     return { breaking: false, keywords: [], text: "" };
   }
 
-  const releasesUrl = `${normalizedUrl}/releases`;
+  const releasesUrl = `${baseUrl}/releases`;
+  console.log(`Navigating to ${releasesUrl}`);
+
+  const detectionTerms = [
+    'breaking change',
+    'breaking changes',
+    'breaking',
+    'deprecated',
+    'removed',
+    'migration',
+    'upgrade guide',
+    'not backwards compatible',
+    'bc break',
+  ];
+
+  const selectors = [
+    "div.release-entry",
+    'div.markdown-body',
+    'div.Box-body',
+    '.markdown-body',
+    '.prose',
+  ];
 
   let result = {
     breaking: false,
     keywords: [],
-    text: "",
+    text: ''
   };
 
-  logStep(`➡️ Visiting Releases Page: ${releasesUrl}`);
+  // logStep(`➡️ Visiting Releases Page: ${releasesUrl}`);
 
   const crawler = new PlaywrightCrawler({
-    maxRequestsPerCrawl: 1,
+    // maxRequestsPerCrawl: 1,
+    maxConcurrency : 1,
     requestHandlerTimeoutSecs: 60,
-    launchContext: {
-      launchOptions: {
-        headless: true,
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      },
-    },
-    requestHandler: async ({ page, request, log }) => {
-      await page.setExtraHTTPHeaders({
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
-      });
+    navigationTimeoutSecs: 60,
+    async requestHandler({ page, request, log }) {
+      log.info(`Visiting Releases Page: ${request.url}`);
 
-      log.info(`🔍 Navigating to: ${request.url}`);
-
-      const response = await page.goto(request.url, {
-        waitUntil: "networkidle",
+      await page.goto(request.url, {
+        waitUntil: "domcontentloaded",
         timeout: 60000,
       });
 
-      if (!response) {
-        log.warning("⚠️ No response from GitHub. Possibly rate-limited.");
-        return;
+      let text = '';
+
+      for (const selector of selectors) {
+        const handle = await page.$(selector);
+        if (handle) {
+          text = await handle.evaluate((el) => el.innerText || el.textContent || '');
+          if (text && text.trim()) {
+            log.info(`Extracted text with selector: ${selector}`);
+            break;
+          }
+        }
       }
 
-      log.info(`🌐 Status: ${response.status()} ${response.statusText()}`);
-
-      // Prefer release notes div if available
-      let text =
-        (await page.textContent("div.markdown-body")).trim() ||
-        (await page.textContent("body")).trim();
-
-      result.text = text || "";
-
-      const lower = text.toLowerCase();
-
-      const indicators = [
-        "breaking change",
-        "breaking changes",
-        "breaking",
-        "deprecated",
-        "removed",
-        "migration",
-        "upgrade guide",
-        "not backwards compatible",
-        "bc break",
-      ];
-
-      const matches = indicators.filter((k) => lower.includes(k));
-
-      if (matches.length > 0) {
-        result.breaking = true;
-        result.keywords = matches;
+      //fallback : whole page text
+      if (!text || !text.trim()) {
+        text = await page.evaluate(() => (document.body ? document.body.innerText || '' : ''));
+        console.log('Extracted text from document.body fallback');
       }
-    },
-    failedRequestHandler: ({ request, log }) => {
-      log.error(`❌ Request failed for ${request.url}`);
+
+      const normalizedText = text.trim();
+      const lowered = normalizedText.toLowerCase();
+      const found = detectionTerms.filter((term) => lowered.includes(term));
+
+      result.text = normalizedText;
+      result.keywords = Array.from(new Set(found));
+      result.breaking = result.keywords.length > 0;
     },
   });
 
   await crawler.run([releasesUrl]);
-
+  console.log('Crawl complete');
   return result;
 }
 
@@ -110,3 +104,5 @@ module.exports = {
   scrapeReleases,
   normalizeGitHubUrl,
 };
+
+

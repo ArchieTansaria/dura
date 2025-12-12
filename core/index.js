@@ -1,205 +1,229 @@
-#!/usr/bin/env node
-
-/**
- * DURA - Dependency Update Risk Analyzer
- * Entry point for the CLI tool
- */
-
-const { fetchPackageJson } = require("./src/fetchPackageJson");
+const { fetchPackageJson, parseGitHubUrl } = require("./src/fetchPackageJson");
 const { extractDependencies } = require("./src/getDependencies");
-const { fetchNpmInfo, extractLatestVersion, extractGithubRepoUrl } = require("./src/npmInfo");
+const {
+  fetchNpmInfo,
+  extractLatestVersion,
+  extractGithubRepoUrl,
+} = require("./src/npmInfo");
 const { semverDiff } = require("./src/semverDiff");
 const { computeRisk } = require("./src/risk");
 const { scrapeReleases } = require("./src/scrapeReleases");
-const { logStep } = require("./src/utils");
+const { logStep } = require("./utils/logger");
 
-/**
- * Formats a report as a table
- * @param {Array} report - Array of dependency report objects
- */
-function printTable(report) {
-  console.log("\n" + "=".repeat(100));
-  console.log("DEPENDENCY RISK REPORT");
-  console.log("=".repeat(100) + "\n");
-  
-  // Calculate column widths
-  const columns = ["name", "type", "currentRange", "currentResolved", "latest", "diff", "breaking", "riskScore", "riskLevel"];
-  const widths = {};
-  
-  columns.forEach(col => {
-    widths[col] = Math.max(
-      col.length,
-      ...report.map(r => String(r[col] || "").length)
+// async function tryBranch(owner, repo, branch) {
+//   const url = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/package.json`;
+//   logStep(`Trying branch "${branch}": ${url}`);
+
+//   const res = await fetch(url);
+//   if (res.ok) {
+//     const pkg = await res.json();
+//     logStep(`✔ package.json found in branch "${branch}"`);
+//     return pkg;
+//   }
+
+//   logStep(`✖ package.json not found in branch "${branch}" (HTTP ${res.status})`);
+//   return null;
+// }
+
+// async function getDefaultBranch(owner, repo) {
+//   const apiUrl = `https://api.github.com/repos/${owner}/${repo}`;
+//   logStep(`Fetching default branch from ${apiUrl}`);
+
+//   const res = await fetch(apiUrl, {
+//     headers: { "User-Agent": "DURA-Agent" }
+//   });
+
+//   if (!res.ok) {
+//     logStep(`⚠ Failed to fetch default branch (HTTP ${res.status})`);
+//     return null;
+//   }
+
+//   const json = await res.json();
+//   return json.default_branch || null;
+// }
+
+// async function fetchPackageJson(repoUrl, branch) {
+//   const { owner, repo } = parseGitHubUrl(repoUrl);
+
+//   // Try specified branch first
+//   let pkg = await tryBranch(owner, repo, branch);
+//   if (pkg) return pkg;
+
+//   // Fall back to main if not already tried
+//   if (branch !== "main") {
+//     pkg = await tryBranch(owner, repo, "main");
+//     if (pkg) return pkg;
+//   }
+
+//   // Fall back to master if not already tried
+//   if (branch !== "master") {
+//     pkg = await tryBranch(owner, repo, "master");
+//     if (pkg) return pkg;
+//   }
+
+//   // Try default branch
+//   const defaultBranch = await getDefaultBranch(owner, repo);
+//   if (defaultBranch && defaultBranch !== branch && defaultBranch !== "main" && defaultBranch !== "master") {
+//     pkg = await tryBranch(owner, repo, defaultBranch);
+//     if (pkg) return pkg;
+//   }
+
+//   throw new Error(`❌ package.json not found in ${branch}, main, master, or default branch for ${owner}/${repo}`);
+// }
+
+function formatTable(report) {
+  const headers = [
+    "name",
+    "type",
+    "currentRange",
+    "currentResolved",
+    "latest",
+    "diff",
+    "breaking",
+    "riskScore",
+    "riskLevel",
+  ];
+
+  const rows = report.map((dep) => [
+    dep.name || "",
+    dep.type || "",
+    dep.currentRange || "",
+    dep.currentResolved || "N/A",
+    dep.latest || "N/A",
+    dep.diff || "unknown",
+    dep.breaking ? "yes" : "no",
+    dep.riskScore?.toString() || "0",
+    dep.riskLevel || "low",
+  ]);
+
+  const allRows = [headers, ...rows];
+  const colWidths = headers.map((_, colIdx) => {
+    return Math.max(
+      ...allRows.map((row) => (row[colIdx] || "").toString().length),
+      headers[colIdx].length
     );
   });
-  
-  // Print header
-  const header = columns.map(col => col.padEnd(widths[col])).join(" | ");
-  console.log(header);
-  console.log("-".repeat(header.length));
-  
-  // Print rows
-  report.forEach(row => {
-    const rowStr = columns.map(col => String(row[col] || "").padEnd(widths[col])).join(" | ");
-    console.log(rowStr);
-  });
-  
-  console.log("\n" + "=".repeat(100) + "\n");
+
+  const pad = (str, width) => {
+    const s = (str || "").toString();
+    return s.padEnd(width);
+  };
+
+  const separator = "+" + colWidths.map((w) => "-".repeat(w + 2)).join("+") + "+";
+
+  let output = separator + "\n";
+  output +=
+    "| " +
+    headers.map((h, i) => pad(h, colWidths[i])).join(" | ") +
+    " |\n";
+  output += separator + "\n";
+
+  for (const row of rows) {
+    output +=
+      "| " +
+      row.map((cell, i) => pad(cell, colWidths[i])).join(" | ") +
+      " |\n";
+  }
+
+  output += separator;
+  return output;
 }
 
-/**
- * Main execution function
- */
-async function run() {
+async function analyzeDependency(dep, index, total) {
+  const { name, range, type } = dep;
+  logStep(`[${index + 1}/${total}] Processing ${name}...`);
+
+  let npmJson = null;
+  let latestVersion = null;
+  let githubRepoUrl = null;
+  let releaseData = { breaking: false, keywords: [], text: "" };
+  let diffResult = { diff: "unknown", currentResolved: null };
+  let riskResult = { score: 0, level: "low" };
+
   try {
-    // Parse CLI arguments
-    const repoUrl = process.argv[2];
-    const branch = process.argv[3] || "main";
-    
-    // Validate arguments
-    if (!repoUrl) {
-      console.error("Usage: node index.js <github-repo-url> [branch]");
-      console.error("Example: node index.js https://github.com/vercel/next.js main");
-      process.exit(1);
+    npmJson = await fetchNpmInfo(name);
+    latestVersion = extractLatestVersion(npmJson);
+    githubRepoUrl = extractGithubRepoUrl(npmJson);
+
+    // console.log(npmJson)
+    // console.log(latestVersion)
+    // console.log(githubRepoUrl)
+
+    if (latestVersion) {
+      diffResult = semverDiff(range, latestVersion);
     }
-    
-    // Step 1: Fetch package.json
-    const pkgJson = await fetchPackageJson(repoUrl, branch);
-    
-    // Step 2: Get dependencies
-    const dependencies = extractDependencies(pkgJson, true);
-    logStep(`Found ${dependencies.length} dependencies`);
-    
-    if (dependencies.length === 0) {
-      logStep("No dependencies found in package.json");
-      console.log("\n--- JSON REPORT ---\n");
-      console.log(JSON.stringify([], null, 2));
-      return;
-    }
-    
-    // Step 3: Analyze each dependency
-    logStep("Analyzing dependencies...");
-    const report = [];
-    
-    for (let i = 0; i < dependencies.length; i++) {
-      const dep = dependencies[i];
-      const progress = `[${i + 1}/${dependencies.length}]`;
-      
+
+    // console.log(diffResult)
+
+    if (githubRepoUrl) {
       try {
-        // Fetch npm info
-        const npmJson = await fetchNpmInfo(dep.name);
-        const latestVersion = extractLatestVersion(npmJson);
-        
-        // Extract GitHub repo URL
-        const repoUrl = extractGithubRepoUrl(npmJson);
-        
-        // Scrape releases for breaking changes
-        let scrapingResult = null;
-        if (repoUrl) {
-          try {
-            scrapingResult = await scrapeReleases(repoUrl);
-          } catch (err) {
-            // Fallback on scraping error
-            scrapingResult = { breaking: false, keywords: [], text: "" };
-          }
-        } else {
-          scrapingResult = { breaking: false, keywords: [], text: "" };
-        }
-        
-        if (!latestVersion) {
-          // No latest version found, mark as unknown
-          const diffResult = { diff: "unknown", currentResolved: null };
-          const risk = computeRisk({ 
-            diff: "unknown", 
-            type: dep.type,
-            breaking: scrapingResult.breaking
-          });
-          
-          report.push({
-            name: dep.name,
-            type: dep.type,
-            currentRange: dep.range,
-            currentResolved: null,
-            latest: null,
-            diff: "unknown",
-            breaking: scrapingResult.breaking,
-            breakingKeywords: scrapingResult.keywords,
-            repoUrl: repoUrl,
-            releaseNotesSnippet: scrapingResult.text.slice(0, 500),
-            riskScore: risk.score,
-            riskLevel: risk.level
-          });
-          
-          continue;
-        }
-        
-        // Compute semver diff
-        const diffResult = semverDiff(dep.range, latestVersion);
-        
-        // Compute risk (now includes breaking changes)
-        const risk = computeRisk({ 
-          diff: diffResult.diff, 
-          type: dep.type,
-          breaking: scrapingResult.breaking
-        });
-        
-        // Add to report
-        report.push({
-          name: dep.name,
-          type: dep.type,
-          currentRange: dep.range,
-          currentResolved: diffResult.currentResolved,
-          latest: latestVersion,
-          diff: diffResult.diff,
-          breaking: scrapingResult.breaking,
-          breakingKeywords: scrapingResult.keywords,
-          repoUrl: repoUrl,
-          releaseNotesSnippet: scrapingResult.text.slice(0, 500),
-          riskScore: risk.score,
-          riskLevel: risk.level
-        });
-        
-        // Log progress for every 10th dependency or last one
-        if ((i + 1) % 10 === 0 || i === dependencies.length - 1) {
-          logStep(`Processed ${i + 1}/${dependencies.length} dependencies...`);
-        }
+        releaseData = await scrapeReleases(githubRepoUrl);
       } catch (error) {
-        // Handle errors for individual dependencies
-        console.error(`\n[ERROR] Failed to analyze ${dep.name}: ${error.message}`);
-        
-        // Add error entry to report
-        report.push({
-          name: dep.name,
-          type: dep.type,
-          currentRange: dep.range,
-          currentResolved: null,
-          latest: null,
-          diff: "unknown",
-          breaking: false,
-          breakingKeywords: [],
-          repoUrl: null,
-          releaseNotesSnippet: "",
-          riskScore: 10,
-          riskLevel: "low",
-          error: error.message
-        });
+        logStep(`⚠ Scraping failed for ${name}, using fallback`);
+        releaseData = { breaking: false, keywords: [], text: "" };
       }
     }
-    
-    // Step 4: Output results
-    printTable(report);
-    
-    console.log("--- JSON REPORT ---\n");
-    console.log(JSON.stringify(report, null, 2));
-    
-    logStep("Analysis complete!");
-    
+
+    riskResult = computeRisk({
+      diff: diffResult.diff,
+      type,
+      breaking: releaseData.breaking,
+    });
   } catch (error) {
-    console.error(`\n[ERROR] ${error.message}`);
+    logStep(`⚠ Error processing ${name}: ${error.message}`);
+  }
+
+  return {
+    name,
+    type,
+    currentRange: range,
+    currentResolved: diffResult.currentResolved,
+    latest: latestVersion,
+    diff: diffResult.diff,
+    breaking: releaseData.breaking,
+    riskScore: riskResult.score,
+    riskLevel: riskResult.level,
+    githubRepoUrl,
+    releaseKeywords: releaseData.keywords,
+  };
+}
+
+async function main() {
+  const args = process.argv.slice(2);
+
+  if (args.length === 0) {
+    console.error("Usage: node index.js <github-repo-url> [branch]");
+    process.exit(1);
+  }
+
+  const repoUrl = args[0];
+  const branch = args[1] || "main";
+
+  try {
+    logStep(`Starting analysis for ${repoUrl} (branch: ${branch})`);
+
+    const pkgJson = await fetchPackageJson(repoUrl, branch);
+    const dependencies = extractDependencies(pkgJson, true);
+
+    logStep(`Found ${dependencies.length} dependencies`);
+
+    const report = [];
+    for (let i = 0; i < dependencies.length; i++) {
+      const result = await analyzeDependency(dependencies[i], i, dependencies.length);
+      report.push(result);
+    }
+
+    console.log("\n" + formatTable(report) + "\n");
+    console.log("--- JSON REPORT ---");
+    console.log(JSON.stringify(report, null, 2));
+  } catch (error) {
+    console.error(`❌ Error: ${error.message}`);
     process.exit(1);
   }
 }
 
-// Run the main function
-run();
+if (require.main === module) {
+  main();
+}
 
+module.exports = { main };

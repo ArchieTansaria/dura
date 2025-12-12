@@ -1,6 +1,5 @@
-/**
- * Fetches package.json from a GitHub repository
- */
+
+// Fetches package.json from a GitHub repository
 
 const fetch = require("node-fetch");
 const { logStep } = require("./utils");

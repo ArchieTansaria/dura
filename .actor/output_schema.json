@@ -1,5 +1,6 @@
 {
   "actorOutputSchemaVersion": 1,
+  "type": "object",
   "title": "DURA Output Schema",
   "description": "Links to the dataset containing dependency risk results.",
   "properties": {
@@ -10,3 +11,4 @@
     }
   }
 }
+

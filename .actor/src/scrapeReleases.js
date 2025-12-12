@@ -1,5 +1,5 @@
 const { PlaywrightCrawler } = require("crawlee");
-const { logStep } = require("./utils");
+// const { logStep } = require("./utils");
 
 function normalizeGitHubUrl(repoUrl) {
   if (!repoUrl) return null;
@@ -37,7 +37,7 @@ async function scrapeReleases(repoUrl) {
     text: "",
   };
 
-  logStep(`➡️ Visiting Releases Page: ${releasesUrl}`);
+  // logStep(`Visiting Releases Page: ${releasesUrl}`);
 
   const crawler = new PlaywrightCrawler({
     maxConcurrency: 1,
@@ -50,7 +50,7 @@ async function scrapeReleases(repoUrl) {
       },
     },
     requestHandler: async ({ page, request, log }) => {
-      log.info(`🔍 Navigating: ${request.url}`);
+      log.info(`Visiting Releases Page: ${request.url}`);
 
       await page.goto(request.url, {
         waitUntil: "domcontentloaded",
@@ -102,7 +102,7 @@ async function scrapeReleases(repoUrl) {
         result.keywords = matches;
       }
 
-      log.info(`📝 Extracted release info (length: ${text.length})`);
+      log.info(`Extracted release info (length: ${text.length})`);
     },
 
     failedRequestHandler: ({ request, log }) => {
