@@ -1,4 +1,5 @@
 const { PlaywrightCrawler } = require('crawlee');
+const { logStep } = require('../utils/logger')
 
 function normalizeGitHubUrl(url) {
   if (!url || typeof url !== 'string') return '';
@@ -23,7 +24,7 @@ async function scrapeReleases(repoUrl) {
   }
 
   const releasesUrl = `${baseUrl}/releases`;
-  console.log(`Navigating to ${releasesUrl}`);
+  logStep(`Navigating to ${releasesUrl}`);
 
   const detectionTerms = [
     'breaking change',
@@ -52,13 +53,14 @@ async function scrapeReleases(repoUrl) {
   };
 
   // logStep(`➡️ Visiting Releases Page: ${releasesUrl}`);
-
+  
+  
   const crawler = new PlaywrightCrawler({
     // maxRequestsPerCrawl: 1,
     maxConcurrency : 1,
     requestHandlerTimeoutSecs: 60,
     navigationTimeoutSecs: 60,
-    async requestHandler({ page, request, log }) {
+    requestHandler: async ({ page, request, log }) => {
       log.info(`Visiting Releases Page: ${request.url}`);
 
       await page.goto(request.url, {
@@ -82,8 +84,10 @@ async function scrapeReleases(repoUrl) {
       //fallback : whole page text
       if (!text || !text.trim()) {
         text = await page.evaluate(() => (document.body ? document.body.innerText || '' : ''));
-        console.log('Extracted text from document.body fallback');
+        log.info('Extracted text from document.body fallback');
       }
+
+      // console.log(text)
 
       const normalizedText = text.trim();
       const lowered = normalizedText.toLowerCase();
@@ -92,11 +96,23 @@ async function scrapeReleases(repoUrl) {
       result.text = normalizedText;
       result.keywords = Array.from(new Set(found));
       result.breaking = result.keywords.length > 0;
+
+      log.info(`Extracted release info (length: ${text.length})`);
+    },
+
+    failedRequestHandler: ({ request, log }) => {
+      log.error(`❌ Failed: ${request.url}`);
     },
   });
 
-  await crawler.run([releasesUrl]);
-  console.log('Crawl complete');
+  try {
+    await crawler.run([releasesUrl]);
+    await crawler.teardown();
+    logStep('Crawl complete');
+  } catch (error) {
+    console.error(`Crawler error: ${error.message}`);
+    await crawler.teardown();
+  }
   return result;
 }
 
