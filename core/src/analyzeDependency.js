@@ -67,4 +67,6 @@ async function analyzeDependency(dep, index, total) {
   };
 }
 
+//TODO handle edgecases
+
 module.exports = { analyzeDependency }
