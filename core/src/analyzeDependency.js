@@ -52,7 +52,7 @@ async function analyzeDependency(dep, index, total) {
     logStep(`⚠ Error processing ${name}: ${error.message}`);
   }
 
-   return {
+  return {
     name,
     type,
     currentRange: range,

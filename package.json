@@ -2,9 +2,13 @@
   "name": "dura",
   "version": "1.0.0",
   "main": "main.js",
+  "type": "commonjs",
   "scripts": {
     "start": "node main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "dura" : "./cli/bin/dura.js"
   },
   "keywords": [],
   "author": "archie tansaria",
