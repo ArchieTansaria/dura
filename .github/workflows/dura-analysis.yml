@@ -1,0 +1,297 @@
+name: DURA Dependency Analysis
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'yarn.lock'
+      - 'pnpm-lock.yaml'
+  workflow_dispatch:
+    inputs:
+      repo-url:
+        description: 'Repository URL to analyze (optional)'
+        required: false
+        type: string
+
+permissions:
+  pull-requests: write
+  contents: read
+  issues: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Determine repository URL
+        id: repo-info
+        run: |
+          if [ -n "${{ github.event.inputs.repo-url }}" ]; then
+            REPO_URL="${{ github.event.inputs.repo-url }}"
+          else
+            REPO_URL="https://github.com/${{ github.repository }}"
+          fi
+          echo "repo_url=$REPO_URL" >> $GITHUB_OUTPUT
+          echo "🦖 Analyzing: $REPO_URL"
+
+      - name: Run DURA Analysis
+        id: dura
+        run: |
+          echo "🦖 Running DURA analysis..."
+          mkdir -p output
+          
+          # Run DURA via npx (package name: dura-kit, command: dura)
+          if npx dura-kit "${{ steps.repo-info.outputs.repo_url }}" --json > output/dura-results.json 2> output/dura-error.log; then
+            echo "✅ Analysis completed successfully"
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ Analysis completed with warnings"
+            echo "success=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Show preview in logs
+          if [ -f output/dura-results.json ]; then
+            echo "📊 Results preview:"
+            head -50 output/dura-results.json
+          fi
+        continue-on-error: true
+
+      - name: Parse DURA Results
+        id: parse
+        run: |
+          if [ ! -f output/dura-results.json ]; then
+            echo "❌ No results file found"
+            echo "high_risk=0" >> $GITHUB_OUTPUT
+            echo "medium_risk=0" >> $GITHUB_OUTPUT
+            echo "low_risk=0" >> $GITHUB_OUTPUT
+            echo "total=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Install jq for JSON parsing
+          if ! command -v jq &> /dev/null; then
+            sudo apt-get update && sudo apt-get install -y jq
+          fi
+          
+          # Parse risk counts
+          HIGH_RISK=$(jq '[.dependencies[]? | select(.riskLevel == "high")] | length' output/dura-results.json 2>/dev/null || echo "0")
+          MEDIUM_RISK=$(jq '[.dependencies[]? | select(.riskLevel == "medium")] | length' output/dura-results.json 2>/dev/null || echo "0")
+          LOW_RISK=$(jq '[.dependencies[]? | select(.riskLevel == "low")] | length' output/dura-results.json 2>/dev/null || echo "0")
+          TOTAL=$(jq '.dependencies | length' output/dura-results.json 2>/dev/null || echo "0")
+          
+          echo "high_risk=$HIGH_RISK" >> $GITHUB_OUTPUT
+          echo "medium_risk=$MEDIUM_RISK" >> $GITHUB_OUTPUT
+          echo "low_risk=$LOW_RISK" >> $GITHUB_OUTPUT
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
+          
+          echo "📊 Risk Summary: High=$HIGH_RISK, Medium=$MEDIUM_RISK, Low=$LOW_RISK, Total=$TOTAL"
+
+      - name: Comment PR with DURA Results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            
+            // Check if results file exists
+            if (!fs.existsSync('output/dura-results.json')) {
+              const errorComment = `## 🦖 DURA Analysis Failed
+              
+              ❌ Could not complete dependency analysis.
+              
+              <details>
+              <summary>📋 View Error Log</summary>
+              
+              \`\`\`
+              ${fs.existsSync('output/dura-error.log') ? fs.readFileSync('output/dura-error.log', 'utf8') : 'No error log available'}
+              \`\`\`
+              </details>
+              
+              ---
+              *Powered by [dura-kit](https://www.npmjs.com/package/dura-kit)*`;
+              
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: errorComment
+              });
+              return;
+            }
+            
+            const results = JSON.parse(fs.readFileSync('output/dura-results.json', 'utf8'));
+            const highCount = ${{ steps.parse.outputs.high_risk }};
+            const mediumCount = ${{ steps.parse.outputs.medium_risk }};
+            const lowCount = ${{ steps.parse.outputs.low_risk }};
+            const totalCount = ${{ steps.parse.outputs.total }};
+            
+            // Build comment header
+            let comment = `## 🦖 DURA Dependency Analysis\n\n`;
+            comment += `> Powered by [dura-kit](https://www.npmjs.com/package/dura-kit) • Commit \`${context.sha.substring(0, 7)}\`\n\n`;
+            
+            // Risk Summary Table
+            comment += `### 📊 Risk Summary\n\n`;
+            comment += `| Risk Level | Count | Status |\n`;
+            comment += `|------------|-------|--------|\n`;
+            comment += `| ⚠️ High Risk | **${highCount}** | ${highCount > 0 ? '🔴 Action Required' : '✅ None'} |\n`;
+            comment += `| ⚡ Medium Risk | ${mediumCount} | ${mediumCount > 0 ? '🟡 Review Recommended' : '✅ None'} |\n`;
+            comment += `| ✅ Low Risk | ${lowCount} | 🟢 Safe to Update |\n`;
+            comment += `| **Total Dependencies** | **${totalCount}** | - |\n\n`;
+            
+            // High Risk Details
+            const highRisk = results.dependencies?.filter(d => d.riskLevel === 'high') || [];
+            if (highRisk.length > 0) {
+              comment += `### 🚨 High Risk Dependencies\n\n`;
+              comment += `> ⚠️ These dependencies require careful review before updating.\n\n`;
+              
+              highRisk.slice(0, 10).forEach((dep, index) => {
+                comment += `#### ${index + 1}. \`${dep.name}\`\n`;
+                comment += `- **Current:** \`${dep.currentVersion || 'N/A'}\`\n`;
+                comment += `- **Latest:** \`${dep.latestVersion || 'N/A'}\`\n`;
+                if (dep.reason) {
+                  comment += `- **Why High Risk:** ${dep.reason}\n`;
+                }
+                if (dep.breakingChanges) {
+                  comment += `- 💥 **Breaking changes detected**\n`;
+                }
+                if (dep.securityVulnerabilities) {
+                  comment += `- 🔒 **Security vulnerabilities found**\n`;
+                }
+                comment += `\n`;
+              });
+              
+              if (highRisk.length > 10) {
+                comment += `*... and ${highRisk.length - 10} more high-risk dependencies*\n\n`;
+              }
+            }
+            
+            // Medium Risk Summary
+            const mediumRisk = results.dependencies?.filter(d => d.riskLevel === 'medium') || [];
+            if (mediumRisk.length > 0) {
+              comment += `### ⚡ Medium Risk Dependencies\n\n`;
+              comment += `<details>\n<summary>📋 View ${mediumRisk.length} medium risk dependencies</summary>\n\n`;
+              
+              mediumRisk.slice(0, 15).forEach((dep, index) => {
+                comment += `${index + 1}. **${dep.name}**: \`${dep.currentVersion || 'N/A'}\` → \`${dep.latestVersion || 'N/A'}\`\n`;
+                if (dep.reason) comment += `   - ${dep.reason}\n`;
+              });
+              
+              if (mediumRisk.length > 15) {
+                comment += `\n*... and ${mediumRisk.length - 15} more*\n`;
+              }
+              
+              comment += `\n</details>\n\n`;
+            }
+            
+            // Recommendations
+            if (results.recommendations?.length > 0) {
+              comment += `### 💡 Recommendations\n\n`;
+              results.recommendations.slice(0, 5).forEach((rec, i) => {
+                comment += `${i + 1}. ${rec}\n`;
+              });
+              comment += `\n`;
+            }
+            
+            // Action summary
+            comment += `---\n\n`;
+            if (highRisk.length === 0 && mediumRisk.length === 0) {
+              comment += `### ✨ All Clear!\n\n`;
+              comment += `All dependencies are **safe to update** with low risk. You can proceed with confidence! 🚀\n\n`;
+            } else if (highRisk.length > 0) {
+              comment += `### ⚠️ Action Required\n\n`;
+              comment += `**${highRisk.length}** high-risk ${highRisk.length === 1 ? 'dependency' : 'dependencies'} found. Please review carefully before merging.\n\n`;
+              comment += `**Recommended Steps:**\n`;
+              comment += `1. Review breaking changes and migration guides\n`;
+              comment += `2. Update tests to cover new behavior\n`;
+              comment += `3. Test thoroughly in a staging environment\n`;
+              comment += `4. Consider updating dependencies incrementally\n\n`;
+            } else {
+              comment += `### 👀 Review Recommended\n\n`;
+              comment += `**${mediumRisk.length}** medium-risk ${mediumRisk.length === 1 ? 'dependency' : 'dependencies'} found. Review recommended before updating.\n\n`;
+            }
+            
+            // Try DURA yourself
+            comment += `---\n\n`;
+            comment += `### 🔧 Try DURA Yourself\n\n`;
+            comment += `\`\`\`bash\n`;
+            comment += `# Run with npx (no installation needed)\n`;
+            comment += `npx dura-kit https://github.com/${context.repo.owner}/${context.repo.repo}\n\n`;
+            comment += `# Or install globally\n`;
+            comment += `npm install -g dura-kit\n`;
+            comment += `dura https://github.com/${context.repo.owner}/${context.repo.repo}\n`;
+            comment += `\`\`\`\n\n`;
+            
+            // Full results
+            comment += `<details>\n<summary>📄 Full Analysis Report (JSON)</summary>\n\n`;
+            comment += `\`\`\`json\n`;
+            const truncatedResults = JSON.stringify(results, null, 2);
+            comment += truncatedResults.length > 60000 ? truncatedResults.substring(0, 60000) + '\n...(truncated)' : truncatedResults;
+            comment += `\n\`\`\`\n`;
+            comment += `</details>\n\n`;
+            
+            comment += `---\n`;
+            comment += `*🦖 Analyzed by [DURA](https://github.com/${{ github.repository }}) • Install: \`npm i -g dura-kit\`*`;
+            
+            // Post comment
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Check for High Risk
+        if: always()
+        run: |
+          if [ "${{ steps.parse.outputs.high_risk }}" -gt "0" ]; then
+            echo "⚠️ Found ${{ steps.parse.outputs.high_risk }} high-risk dependencies"
+            echo "Please review before merging!"
+            exit 1
+          else
+            echo "✅ No high-risk dependencies found"
+            exit 0
+          fi
+
+      - name: Upload Analysis Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dura-analysis-results-${{ github.event.pull_request.number || github.run_number }}
+          path: |
+            output/dura-results.json
+            output/dura-error.log
+          retention-days: 30
+
+      - name: Add to Job Summary
+        if: always()
+        run: |
+          echo "## 🦖 DURA Analysis Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Repository:** \`${{ steps.repo-info.outputs.repo_url }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Risk Level | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|------------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| ⚠️ High | ${{ steps.parse.outputs.high_risk }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ⚡ Medium | ${{ steps.parse.outputs.medium_risk }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ✅ Low | ${{ steps.parse.outputs.low_risk }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Total** | **${{ steps.parse.outputs.total }}** |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.parse.outputs.high_risk }}" -gt "0" ]; then
+            echo "### ⚠️ High Risk Dependencies Found" >> $GITHUB_STEP_SUMMARY
+            echo "Review required before merging!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ✅ All Clear!" >> $GITHUB_STEP_SUMMARY
+            echo "No high-risk dependencies detected." >> $GITHUB_STEP_SUMMARY
+          fi

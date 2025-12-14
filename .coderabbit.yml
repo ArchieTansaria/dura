@@ -1,34 +1,263 @@
-version: 1
+# CodeRabbit Configuration for DURA Integration
+# Integrates dura-kit dependency analysis with CodeRabbit AI reviews
 
+language: "en-US"
+early_access: true
+
+# Review Settings
 reviews:
+  # Auto-review PRs
   auto_review:
     enabled: true
+    drafts: false
     base_branches:
       - main
+      - master
+      - develop
+  
+  # Review style
+  profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: true
+  review_status: true
+  collapse_walkthrough: false
+  
+  # Path-specific instructions
+  path_instructions:
+    - path: "package.json"
+      instructions: |
+        🦖 DURA Integration Active
+        
+        When reviewing package.json changes:
+        1. **ALWAYS check for DURA analysis comment** - Look for the 🦖 DURA comment
+        2. **Reference DURA findings** - Incorporate DURA's risk assessment into your review
+        3. **High-risk updates** - If DURA reports high-risk dependencies:
+           - Flag them prominently in your review
+           - Request the author review breaking changes
+           - Suggest incremental updates if multiple high-risk deps exist
+        4. **Medium-risk updates** - Recommend testing and checking changelogs
+        5. **Security focus** - Highlight any security vulnerabilities DURA found
+        6. **Version strategy** - Verify semantic versioning is followed
+        
+        Example review comment:
+        "According to DURA analysis, `package-x` (v1 → v2) is high-risk due to 
+        breaking changes. Please review the migration guide and update tests."
+    
+    - path: "package-lock.json"
+      instructions: |
+        When reviewing package-lock.json:
+        1. Check it's synchronized with package.json
+        2. Reference DURA analysis for risk assessment
+        3. Flag unexpected transitive dependency changes
+        4. Note: DURA has already analyzed transitive dependencies
+    
+    - path: "yarn.lock"
+      instructions: |
+        When reviewing yarn.lock:
+        1. Verify consistency with package.json
+        2. Check DURA analysis for dependency risks
+        3. Look for unexpected version resolutions
+    
+    - path: "pnpm-lock.yaml"
+      instructions: |
+        When reviewing pnpm-lock.yaml:
+        1. Ensure sync with package.json
+        2. Reference DURA findings
+        3. Check for peer dependency issues
 
-  request_changes_threshold: medium
+# Chat Settings
+chat:
+  auto_reply: true
 
-rules:
-  - name: Dependency safety
-    description: >
-      Flag risky dependency usage, breaking changes,
-      unsafe scraping patterns, and unhandled edge cases.
+# Knowledge Base
+knowledge_base:
+  learnings:
+    scope: "global"
+  
+  custom:
+    - title: "DURA (Dependency Update Risk Analyzer)"
+      content: |
+        DURA is an automated dependency risk analysis tool that runs on every PR
+        that modifies package files. 
+        
+        **Package Details:**
+        - npm package: dura-kit
+        - CLI command after install: dura
+        - npx usage: npx dura-kit
+        
+        **How DURA Works:**
+        - Analyzes all dependencies (direct + transitive)
+        - Categorizes risk levels: High, Medium, Low
+        - Identifies breaking changes, security issues, and compatibility problems
+        - Posts detailed analysis as PR comment
+        
+        **Risk Levels:**
+        
+        🔴 **High Risk:**
+        - Major version bumps (breaking changes)
+        - Known security vulnerabilities
+        - Deprecated packages
+        - Large API changes
+        → Action: Require thorough review, testing, and migration planning
+        
+        🟡 **Medium Risk:**
+        - Minor version updates with behavior changes
+        - New features that might affect existing code
+        - Dependencies with poor documentation
+        → Action: Recommend testing and changelog review
+        
+        🟢 **Low Risk:**
+        - Patch updates
+        - Bug fixes only
+        - Well-tested dependencies
+        → Action: Generally safe to merge
+        
+        **Integration with CodeRabbit:**
+        1. Wait for DURA analysis to complete (GitHub Action)
+        2. Read the DURA comment on the PR
+        3. Incorporate DURA's findings into your code review
+        4. Reference specific high-risk items DURA identified
+        5. Provide actionable next steps based on risk level
+        
+        **Example Review Flow:**
+        - DURA finds 2 high-risk deps → Flag in review, request testing
+        - DURA finds only low-risk deps → Approve with confidence
+        - DURA finds security issues → Prioritize in review comments
+        
+        **CLI Usage:**
+        ```bash
+        # With npx (no install)
+        npx dura-kit https://github.com/owner/repo
+        
+        # Or install globally
+        npm install -g dura-kit
+        dura https://github.com/owner/repo
+        ```
+    
+    - title: "Dependency Update Best Practices"
+      content: |
+        When reviewing dependency updates:
+        
+        1. **Check DURA first** - Let automated analysis guide your review
+        2. **Read changelogs** - Especially for high-risk updates
+        3. **Test incrementally** - Don't update everything at once
+        4. **Check for breaking changes** - DURA highlights these
+        5. **Security first** - Prioritize security updates even if risky
+        6. **Peer dependencies** - Verify compatibility
+        7. **Lock file integrity** - Ensure lock files are committed
+        8. **CI passes** - Don't merge if tests fail
 
-  - name: CLI correctness
-    description: >
-      Ensure CLI flags, argument parsing, and exit codes
-      follow best practices.
+# External Checks
+external_checks:
+  - name: "DURA Dependency Analysis"
+    description: "Automated dependency risk analysis"
+    required: false
+    wait_for_completion: true
 
-  - name: Web scraping reliability
-    description: >
-      Review Playwright + Crawlee usage for timeouts,
-      concurrency, error handling, and rate limiting.
+# Auto Labels
+auto_labels:
+  - name: "dependencies"
+    description: "Dependency updates"
+    color: "0366d6"
+    patterns:
+      - "package.json"
+      - "package-lock.json"
+      - "yarn.lock"
+      - "pnpm-lock.yaml"
+  
+  - name: "security"
+    description: "Security-related changes"
+    color: "d73a4a"
+    patterns:
+      - "security"
+      - "vulnerability"
+      - "CVE-"
+  
+  - name: "high-risk-deps"
+    description: "High risk dependency update"
+    color: "d93f0b"
+    patterns:
+      - "breaking"
+      - "major version"
+  
+  - name: "needs-testing"
+    description: "Requires testing"
+    color: "fbca04"
+    patterns:
+      - "high risk"
+      - "breaking change"
 
-  - name: Security
-    description: >
-      Detect unsafe network calls, missing headers,
-      and unvalidated external inputs.
+# Review Tone
+tone_instructions: |
+  Maintain a helpful, constructive tone:
+  - Reference DURA analysis results naturally
+  - Explain WHY updates are risky, don't just flag them
+  - Provide actionable recommendations
+  - Use 🦖 emoji when referencing DURA
+  - Be encouraging about low-risk updates
+  - Take security issues seriously but don't alarm unnecessarily
 
-tone:
-  polite: true
-  concise: true
+# Master Review Instructions
+review_instructions: |
+  **Core Review Process:**
+  
+  1. **DURA Integration (Critical):**
+     - Check if DURA analysis ran successfully
+     - Read the DURA comment thoroughly
+     - Base your dependency risk assessment on DURA findings
+     - Reference specific DURA results in your comments
+  
+  2. **Dependency Review Priority:**
+     a) High-risk dependencies (from DURA):
+        - Request breaking change review
+        - Ask about testing plan
+        - Suggest checking migration guides
+        - Recommend incremental updates
+     
+     b) Security vulnerabilities:
+        - Prioritize regardless of risk level
+        - Check if CVEs are addressed
+        - Verify patch effectiveness
+     
+     c) Medium/Low risk:
+        - Light review for medium-risk
+        - Approve low-risk updates confidently
+  
+  3. **Code Quality:**
+     - Standard code review practices
+     - Test coverage for affected code
+     - Documentation updates if needed
+  
+  4. **Final Recommendation:**
+     - High-risk present → Request changes + testing
+     - Medium-risk only → Approve with comments
+     - Low-risk only → Approve
+     - Security issues → Approve after verification
+  
+  **Example Review Template:**
+  
+  ```
+  ## Dependency Analysis
+  
+  🦖 According to DURA analysis:
+  - High risk: [list if any]
+  - Medium risk: [list if any]
+  - Recommendations: [from DURA]
+  
+  ### My Review
+  [Your specific feedback based on DURA findings]
+  
+  ### Action Items
+  1. [Specific next steps]
+  ```
+
+# Files to Exclude
+exclude:
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/coverage/**"
+  - "**/*.lock"
+  - "**/.next/**"
+  - "**/out/**"
