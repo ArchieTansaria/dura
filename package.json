@@ -1,5 +1,5 @@
 {
-  "name": "dura",
+  "name": "dura-kit",
   "version": "1.0.0",
   "main": "main.js",
   "type": "commonjs",
@@ -8,14 +8,25 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "dura" : "./cli/bin/dura.js"
+    "dura": "./cli/bin/dura.js"
   },
+  "files": [
+    "cli/bin/",
+    "cli/package.json",
+    "cli/package-lock.json",
+    "core/src/",
+    "core/index.js",
+    "core/utils/",
+    "LICENSE",
+    "README.md"
+  ],
   "keywords": [],
   "author": "archie tansaria",
   "license": "MIT License",
   "description": "Dependency Update Risk Analyzer",
   "dependencies": {
     "crawlee": "^3.15.3",
+    "dura-kit": "^1.0.0",
     "node-fetch": "^3.3.2",
     "playwright": "^1.57.0",
     "semver": "^7.7.3"

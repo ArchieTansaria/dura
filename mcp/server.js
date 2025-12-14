@@ -64,7 +64,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     try {
       // Run your CLI command
-      const command = `node ${CLI_PATH} ${repoUrl} --json`;
+      const command = `dura ${repoUrl} --json`;
       const { stdout, stderr } = await execAsync(command, {
         maxBuffer: 10 * 1024 * 1024, // 10MB buffer for large outputs
         timeout: 120000, // 2 minute timeout

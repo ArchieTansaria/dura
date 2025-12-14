@@ -1,0 +1,13 @@
+node_modules
+.git
+.gitignore
+storage
+test
+*.log
+.env
+.vSCode
+.cursor
+cli/node_modules/**
+cli/storage/**
+core/storage/**
+core/test/**
