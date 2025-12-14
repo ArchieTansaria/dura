@@ -28,7 +28,7 @@ const server = new Server(
   }
 );
 
-// List available tools
+//List available tools
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
