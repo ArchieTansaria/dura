@@ -1,0 +1,34 @@
+version: 1
+
+reviews:
+  auto_review:
+    enabled: true
+    base_branches:
+      - main
+
+  request_changes_threshold: medium
+
+rules:
+  - name: Dependency safety
+    description: >
+      Flag risky dependency usage, breaking changes,
+      unsafe scraping patterns, and unhandled edge cases.
+
+  - name: CLI correctness
+    description: >
+      Ensure CLI flags, argument parsing, and exit codes
+      follow best practices.
+
+  - name: Web scraping reliability
+    description: >
+      Review Playwright + Crawlee usage for timeouts,
+      concurrency, error handling, and rate limiting.
+
+  - name: Security
+    description: >
+      Detect unsafe network calls, missing headers,
+      and unvalidated external inputs.
+
+tone:
+  polite: true
+  concise: true
