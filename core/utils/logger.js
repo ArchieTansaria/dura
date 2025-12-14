@@ -1,11 +1,23 @@
+let silent = false;
 
-// Utility functions for DURA
+function setSilent(value) {
+  silent = value;
+}
 
-function logStep(msg) {
-  console.log(`[DURA] ${msg}`);
+function logStep(message) {
+  if (silent) return;
+  console.log(`[DURA] ${message}`);
+}
+
+function logError(message) {
+  if (silent) return;
+  console.error(`[DURA] ${message}`);
 }
 
 module.exports = {
-  logStep
+  logStep,
+  logError,
+  setSilent,
 };
+
 

@@ -10,6 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "commander": "^14.0.2"
+    "commander": "^14.0.2",
+    "ora": "^9.0.0"
   }
 }
