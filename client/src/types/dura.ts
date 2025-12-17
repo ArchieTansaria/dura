@@ -29,3 +29,4 @@ export interface AnalyzeRequest {
   repoUrl: string;
   branch?: string;
 }
+

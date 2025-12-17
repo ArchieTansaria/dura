@@ -120,3 +120,4 @@ export const Hero = ({ onAnalyze, isLoading }: HeroProps) => {
     </section>
   );
 };
+

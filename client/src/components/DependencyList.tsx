@@ -215,3 +215,4 @@ export const DependencyList = ({ dependencies, filter = 'all' }: DependencyListP
     </div>
   );
 };
+

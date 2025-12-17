@@ -151,3 +151,4 @@ Output will be in `client/dist/`
 - ✅ URL validation
 
 Enjoy your new DURA frontend! 🦖
+

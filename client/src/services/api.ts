@@ -80,3 +80,4 @@ function generateRecommendations(dependencies: any[]): string[] {
     'All dependencies appear to be up to date or have low risk updates available.',
   ];
 }
+

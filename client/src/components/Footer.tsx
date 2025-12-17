@@ -33,3 +33,4 @@ export const Footer = () => {
     </motion.footer>
   );
 };
+

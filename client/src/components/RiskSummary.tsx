@@ -96,3 +96,4 @@ export const RiskSummary = ({ data }: RiskSummaryProps) => {
     </GlassCard>
   );
 };
+

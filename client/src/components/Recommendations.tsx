@@ -33,3 +33,4 @@ export const Recommendations = ({ recommendations }: RecommendationsProps) => {
     </GlassCard>
   );
 };
+

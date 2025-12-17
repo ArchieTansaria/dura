@@ -33,3 +33,4 @@ export const GlassCard = ({
     </motion.div>
   );
 };
+

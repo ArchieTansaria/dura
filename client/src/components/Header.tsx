@@ -29,3 +29,4 @@ export const Header = () => {
     </motion.header>
   );
 };
+
