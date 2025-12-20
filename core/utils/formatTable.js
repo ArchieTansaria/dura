@@ -6,7 +6,7 @@ function formatTable(report) {
     "currentResolved",
     "latest",
     "diff",
-    "breaking",
+    "breakingSignal",
     "riskScore",
     "riskLevel",
   ];
@@ -18,7 +18,7 @@ function formatTable(report) {
     dep.currentResolved || "N/A",
     dep.latest || "N/A",
     dep.diff || "unknown",
-    dep.breaking ? "yes" : "no",
+    dep.breakingChange?.breaking || "unknown",
     dep.riskScore?.toString() || "0",
     dep.riskLevel || "low",
   ]);

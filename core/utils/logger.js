@@ -1,11 +1,16 @@
-let silent = false;
+let silent = true;
 
 function setSilent(value) {
   silent = value;
 }
 
 function logStep(message) {
-  if (silent) return;
+  if (silent) {
+    process.env.LOG_LEVEL ??= 'ERROR'
+    process.env.CRAWLEE_LOG_LEVEL ??= 'ERROR'
+    process.env.CRAWLEE_LOG_LEVEL_PERF ??= 'ERROR'
+    return
+  };
   console.log(`[DURA] ${message}`);
 }
 

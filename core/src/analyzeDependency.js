@@ -15,7 +15,21 @@ async function analyzeDependency(dep, index, total) {
   let npmJson = null;
   let latestVersion = null;
   let githubRepoUrl = null;
-  let releaseData = { breaking: false, keywords: [], text: "" };
+  let releaseData = { 
+    breaking: false, 
+    keywords: [], 
+    text: "",
+    breakingChange: {
+      breaking: 'unknown',
+      confidenceScore: 0,
+      signals: {
+        strong: [],
+        medium: [],
+        weak: [],
+        negated: false
+      }
+    }
+  };
   let diffResult = { diff: "unknown", currentResolved: null };
   let riskResult = { score: 0, level: "low" };
 
@@ -39,14 +53,28 @@ async function analyzeDependency(dep, index, total) {
         releaseData = await scrapeReleases(githubRepoUrl);
       } catch (error) {
         logStep(`⚠ Scraping failed for ${name}, using fallback`);
-        releaseData = { breaking: false, keywords: [], text: "" };
+        releaseData = { 
+          breaking: false, 
+          keywords: [], 
+          text: "",
+          breakingChange: {
+            breaking: 'unknown',
+            confidenceScore: 0,
+            signals: {
+              strong: [],
+              medium: [],
+              weak: [],
+              negated: false
+            }
+          }
+        };
       }
     }
 
     riskResult = computeRisk({
       diff: diffResult.diff,
       type,
-      breaking: releaseData.breaking,
+      breakingChange: releaseData.breakingChange,
     });
   } catch (error) {
     logStep(`⚠ Error processing ${name}: ${error.message}`);
@@ -59,7 +87,7 @@ async function analyzeDependency(dep, index, total) {
     currentResolved: diffResult.currentResolved,
     latest: latestVersion,
     diff: diffResult.diff,
-    breaking: releaseData.breaking,
+    breakingChange: releaseData.breakingChange,
     riskScore: riskResult.score,
     riskLevel: riskResult.level,
     githubRepoUrl,

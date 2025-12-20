@@ -2,17 +2,10 @@
 
 //entrypoint for cli
 
-//making crawlee logs silent for --json flag using env vars
-const isJson = process.argv.includes('--json');
-if (isJson) {
-  process.env.LOG_LEVEL = 'ERROR';
-  process.env.CRAWLEE_LOG_LEVEL = 'ERROR';
-  process.env.CRAWLEE_LOG_LEVEL_PERF = 'ERROR';
-}
-
 const { Command } = require("commander")
-const { main } = require("../../core/index");
+const { analyzeRepository } = require("../../core/index");
 const { formatTable } = require("../../core/utils/formatTable")
+const { formatSummary } = require("../../core/utils/formatSummary")
 const { helpInfo } = require("../../core/utils/helpInfo")
 
 const pkg = require("../package.json");
@@ -28,31 +21,59 @@ program
 program
   .argument("<repoUrl>", "GitHub repository URL e.g. https://github.com/expressjs/express")
   .argument("[branch]", "Git branch to analyze", "main")
-  .option("--json", "Output JSON only (no table, no logs)")
+  .option("--json", "Output JSON only (no table, logs or summary)")
+  .option("--verbose", "Get detailed progress, warning and scraper logs")
+  .option("--debug", "Enable debug-level logs including internal scraper, network, and performance details (very noisy)")
+  .option("--table", "Output in tabular format")
+  .option("--summary", "Output summary (enabled by default)")
   .action(async (repoUrl, branch, options) => {
 
     try {
-      //making custom logger silent for --json flag
-      if (options.json){
-        setSilent(true)
-        const ora = (await import("ora")).default;
-        spinner = ora("Analyzing dependencies…\n").start();
+      //making spinner disappear for --verbose flag
+      const ora = (await import("ora")).default;
+      const spinner = ora("Analyzing dependencies…\n")
+      if (!options.verbose && !options.debug){
+        spinner.start();
+      }
+      
+      //configuring playwright log levels for different flags
+      if (options.verbose) {
+        process.env.LOG_LEVEL = 'INFO';
+        process.env.CRAWLEE_LOG_LEVEL = 'INFO';
+        process.env.CRAWLEE_LOG_LEVEL_PERF = 'OFF';
+        setSilent(false)
       }
 
-      const report = await main({
+      if (options.debug){
+        process.env.LOG_LEVEL = 'DEBUG';
+        process.env.CRAWLEE_LOG_LEVEL = 'DEBUG';
+        process.env.CRAWLEE_LOG_LEVEL_PERF = 'INFO';
+        setSilent(false)
+      }
+
+      const report = await analyzeRepository({
         repoUrl,
         branch
       });
 
       if (options.json) {
         console.log(JSON.stringify(report, null, 2));
-        if (spinner){
-          spinner.succeed("Analysis complete")
-        }
       } else {
-        console.log("\n" + formatTable(report) + "\n");
-        console.log("--- JSON REPORT ---");
-        console.log(JSON.stringify(report, null, 2));
+          if (options.debug || options.verbose) {
+            console.log("\n" + formatTable(report) + "\n");
+            console.log("\n" + formatSummary(report) + "\n");
+          } else {
+            if (options.table) {
+              console.log("\n" + formatTable(report) + "\n");
+              // console.log("\n" + formatSummary(report) + "\n");
+            } 
+          }
+          if (options.summary || (!options.verbose && !options.debug && !options.table)) {
+            console.log("\n" + formatSummary(report) + "\n");
+          }
+      }
+      if (spinner){
+        spinner.succeed("Analysis complete")
       }
       } catch (err) {
         console.error("❌ Error:", err.message, "\nFor usage, type dura --help");
@@ -72,6 +93,11 @@ Examples:
   $ dura https://github.com/expressjs/express
   $ dura https://github.com/expressjs/express next
   $ dura https://github.com/expressjs/express --json
+  $ dura https://github.com/expressjs/express --verbose
+  $ dura https://github.com/expressjs/express --table
+  $ dura https://github.com/expressjs/express --table --summary
+  $ dura https://github.com/expressjs/express --verbose
+  (all flags are additive in nature except --json)
 `
 );
 

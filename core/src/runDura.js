@@ -50,7 +50,21 @@ async function runDura(repoUrl, branch = "main") {
     let githubRepoUrl = null;
 
     let diffResult = { diff: "unknown", currentResolved: null };
-    let releaseData = { breaking: false, keywords: [], text: "" };
+    let releaseData = { 
+      breaking: false, 
+      keywords: [], 
+      text: "",
+      breakingChange: {
+        breaking: 'unknown',
+        confidenceScore: 0,
+        signals: {
+          strong: [],
+          medium: [],
+          weak: [],
+          negated: false
+        }
+      }
+    };
     let riskResult = { score: 0, level: "low" };
 
     try {
@@ -72,7 +86,21 @@ async function runDura(repoUrl, branch = "main") {
           releaseData = await scrapeReleases(githubRepoUrl);
         } catch (err) {
           logStep(`⚠ Scraping failed for ${dep.name}, using fallback`);
-          releaseData = { breaking: false, keywords: [], text: "" };
+          releaseData = { 
+            breaking: false, 
+            keywords: [], 
+            text: "",
+            breakingChange: {
+              breaking: 'unknown',
+              confidenceScore: 0,
+              signals: {
+                strong: [],
+                medium: [],
+                weak: [],
+                negated: false
+              }
+            }
+          };
         }
       }
 
@@ -80,7 +108,7 @@ async function runDura(repoUrl, branch = "main") {
       riskResult = computeRisk({
         diff: diffResult.diff,
         type: dep.type,
-        breaking: releaseData.breaking,
+        breakingChange: releaseData.breakingChange,
       });
     } catch (error) {
       logStep(`⚠ Error processing ${dep.name}: ${error.message}`);

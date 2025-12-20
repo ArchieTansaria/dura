@@ -1,14 +1,25 @@
-//Computes risk scores based on semantic version differences
+//Computes risk scores based on semantic version differences and breaking change confidence
 
 /**
- * Computes risk score and level based on version difference and breaking changes
- * @param {{diff: string, type: "prod"|"dev", breaking?: boolean}} params - Diff type, dependency type, and breaking changes flag
+ * Breaking risk impact weights by classification level
+ * These represent the maximum contribution when confidenceScore = 1.0
+ */
+const BREAKING_RISK_WEIGHTS = {
+  confirmed: 40,  // High impact - explicit breaking changes
+  likely: 25,      // Medium impact - strong indicators
+  possible: 10,    // Low impact - weak/ambiguous signals
+  unknown: 0       // No impact - no evidence or negated
+};
+
+/**
+ * Computes risk score and level based on version difference and breaking change confidence
+ * @param {{diff: string, type: "prod"|"dev", breakingChange?: {breaking: string, confidenceScore: number}}} params - Diff type, dependency type, and breaking change analysis
  * @returns {{score: number, level: "high"|"medium"|"low"}} - Risk score and level
  */
-function computeRisk({ diff, type, breaking = false }) {
+function computeRisk({ diff, type, breakingChange }) {
   let score = 0;
   
-  // Base score based on diff type
+  // Base score based on semver diff type
   if (diff === "major") {
     score += 60;
   } else if (diff === "minor") {
@@ -23,9 +34,24 @@ function computeRisk({ diff, type, breaking = false }) {
     score += 10;
   }
   
-  // Add score for breaking changes
-  if (breaking) {
-    score += 25;
+  // Add confidence-weighted breaking risk contribution
+  if (breakingChange && breakingChange.breaking && breakingChange.confidenceScore !== undefined) {
+    const breakingClassification = breakingChange.breaking;
+    const confidenceScore = Math.max(0, Math.min(1, breakingChange.confidenceScore)); // Clamp to [0, 1]
+    const baseWeight = BREAKING_RISK_WEIGHTS[breakingClassification] || 0;
+    
+    // Scale breaking risk by confidence: higher confidence = higher risk contribution
+    let breakingRiskContribution = baseWeight * confidenceScore;
+    
+    // Ensure confirmed breaking changes always contribute meaningfully
+    // This guarantees confirmed breaking changes → at least medium risk when combined with semver
+    if (breakingClassification === 'confirmed' && confidenceScore > 0) {
+      // Minimum contribution to ensure minor bumps reach medium risk threshold
+      const minContribution = Math.max(breakingRiskContribution, 10);
+      breakingRiskContribution = minContribution;
+    }
+    
+    score += breakingRiskContribution;
   }
   
   // Apply multiplier for dev dependencies (less risky)
@@ -33,7 +59,11 @@ function computeRisk({ diff, type, breaking = false }) {
     score = Math.round(score * 0.7);
   }
   
-  // Determine risk level
+  // Determine risk level based on combined score
+  // Thresholds ensure:
+  // - Confirmed breaking changes → at least medium risk
+  // - Major semver bumps → high risk
+  // - Unknown/weak signals → low risk
   let level;
   if (score >= 60) {
     level = "high";
@@ -44,7 +74,7 @@ function computeRisk({ diff, type, breaking = false }) {
   }
   
   return {
-    score,
+    score: Math.round(score),
     level
   };
 }

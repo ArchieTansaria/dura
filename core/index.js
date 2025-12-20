@@ -1,11 +1,9 @@
-#!/usr/bin/env node
-
 const { fetchPackageJson } = require("./src/fetchPackageJson");
 const { extractDependencies } = require("./src/getDependencies");
 const { logStep } = require("./utils/logger");
 const { analyzeDependency } = require("./src/analyzeDependency")
 
-async function main({ repoUrl, branch = "main"}) {
+async function analyzeRepository({ repoUrl, branch = "main"}) {
 
   if (!repoUrl) {
     throw new Error("GitHub repository URL is required");
@@ -28,4 +26,4 @@ async function main({ repoUrl, branch = "main"}) {
 
 }
 
-module.exports = { main };
+module.exports = { analyzeRepository };

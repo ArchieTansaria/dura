@@ -1,5 +1,6 @@
 const { PlaywrightCrawler } = require('crawlee');
-const { logStep } = require('../utils/logger')
+const { logStep } = require('../utils/logger');
+const { detectBreakingChange } = require('./detectBreakingChange');
 
 function normalizeGitHubUrl(url) {
   if (!url || typeof url !== 'string') return '';
@@ -20,23 +21,25 @@ async function scrapeReleases(repoUrl) {
   const baseUrl = normalizeGitHubUrl(repoUrl);
 
   if (!baseUrl) {
-    return { breaking: false, keywords: [], text: "" };
+    return { 
+      breaking: false, 
+      keywords: [], 
+      text: "",
+      breakingChange: {
+        breaking: 'unknown',
+        confidenceScore: 0,
+        signals: {
+          strong: [],
+          medium: [],
+          weak: [],
+          negated: false
+        }
+      }
+    };
   }
 
   const releasesUrl = `${baseUrl}/releases`;
   logStep(`Navigating to ${releasesUrl}`);
-
-  const detectionTerms = [
-    'breaking change',
-    'breaking changes',
-    'breaking',
-    'deprecated',
-    'removed',
-    'migration',
-    'upgrade guide',
-    'not backwards compatible',
-    'bc break',
-  ];
 
   const selectors = [
     "div.release-entry",
@@ -49,7 +52,17 @@ async function scrapeReleases(repoUrl) {
   let result = {
     breaking: false,
     keywords: [],
-    text: ''
+    text: '',
+    breakingChange: {
+      breaking: 'unknown',
+      confidenceScore: 0,
+      signals: {
+        strong: [],
+        medium: [],
+        weak: [],
+        negated: false
+      }
+    }
   };
 
   // logStep(`➡️ Visiting Releases Page: ${releasesUrl}`);
@@ -90,12 +103,22 @@ async function scrapeReleases(repoUrl) {
       // console.log(text)
 
       const normalizedText = text.trim();
-      const lowered = normalizedText.toLowerCase();
-      const found = detectionTerms.filter((term) => lowered.includes(term));
-
+      
+      // Use the new robust breaking change detection
+      const breakingChangeResult = detectBreakingChange(normalizedText);
+      
+      // Extract keywords for backward compatibility
+      const allKeywords = [
+        ...breakingChangeResult.signals.strong,
+        ...breakingChangeResult.signals.medium,
+        ...breakingChangeResult.signals.weak
+      ];
+      
       result.text = normalizedText;
-      result.keywords = Array.from(new Set(found));
-      result.breaking = result.keywords.length > 0;
+      result.keywords = allKeywords;
+      // Maintain backward compatibility: breaking is true if confirmed or likely
+      result.breaking = breakingChangeResult.breaking === 'confirmed' || breakingChangeResult.breaking === 'likely';
+      result.breakingChange = breakingChangeResult;
 
       log.info(`Extracted release info (length: ${text.length})`);
     },
