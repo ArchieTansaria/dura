@@ -29,10 +29,12 @@ program
   .action(async (repoUrl, branch, options) => {
 
     try {
-      //making spinner disappear for --verbose flag
-      const ora = (await import("ora")).default;
-      const spinner = ora("Analyzing dependencies…\n")
+      let spinner = null;
+
+      //making spinner disappear for --verbose and --debug flags
       if (!options.verbose && !options.debug){
+        const ora = (await import("ora")).default;
+        spinner = ora("Analyzing dependencies…\n")
         spinner.start();
       }
       
@@ -56,6 +58,10 @@ program
         branch
       });
 
+      if (spinner) {
+        spinner.stop();
+      }
+
       if (options.json) {
         console.log(JSON.stringify(report, null, 2));
       } else {
@@ -76,7 +82,16 @@ program
         spinner.succeed("Analysis complete")
       }
       } catch (err) {
-        console.error("❌ Error:", err.message, "\nFor usage, type dura --help");
+        if (options.json) {
+        // For JSON mode, output structured error to stderr
+          console.error(JSON.stringify({
+            error: true,
+            message: err.message,
+            stack: options.debug ? err.stack : undefined
+          }, null, 2));
+        } else {
+          console.error("❌ Error:", err.message, "\nFor usage, type dura --help");
+        }
         process.exit(1);
       }
   });
