@@ -1,6 +1,6 @@
 {
   "name": "dura-kit",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "main": "main.js",
   "type": "commonjs",
   "scripts": {
@@ -10,7 +10,7 @@
   "bin": {
     "dura": "./cli/bin/dura.js"
   },
-  "files" : [
+  "files": [
     "/cli/bin",
     "/cli/package.json",
     "/cli/package-lock.json",
