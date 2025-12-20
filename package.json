@@ -1,5 +1,5 @@
 {
-  "name": "dura",
+  "name": "dura-kit",
   "version": "1.1.0",
   "main": "main.js",
   "type": "commonjs",
@@ -10,6 +10,14 @@
   "bin": {
     "dura": "./cli/bin/dura.js"
   },
+  "files" : [
+    "/cli/bin",
+    "/cli/package.json",
+    "/cli/package-lock.json",
+    "/core/src",
+    "/core/utils",
+    "/core/index.js"
+  ],
   "keywords": [],
   "author": "archie tansaria",
   "license": "MIT License",
