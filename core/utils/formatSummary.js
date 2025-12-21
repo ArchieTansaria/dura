@@ -2,9 +2,9 @@ const chalk = require('chalk');
 
 // Centralized color definitions
 const colors = {
-  breakingHeader: chalk.red.bold,
-  highRiskHeader: chalk.yellow.bold,
-  mediumRiskHeader: chalk.cyan.bold,
+  breakingHeader: chalk.red,
+  highRiskHeader: chalk.yellow,
+  mediumRiskHeader: chalk.cyan,
   dependencyName: chalk.bold,
   metadata: chalk.dim,
   helpHint: chalk.gray

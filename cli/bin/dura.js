@@ -19,13 +19,13 @@ program
   .version(pkg.version);
 
 program
-  .argument("<repoUrl>", "GitHub repository URL e.g. https://github.com/expressjs/express")
-  .argument("[branch]", "Git branch to analyze", "main")
-  .option("--json", "Output JSON only (no table, logs or summary)")
-  .option("--verbose", "Get detailed progress, warning and scraper logs")
-  .option("--debug", "Enable debug-level logs including internal scraper, network, and performance details (very noisy)")
-  .option("--table", "Output in tabular format")
-  .option("--summary", "Output summary (enabled by default)")
+  .argument("<repoUrl>", "gitHub repository URL e.g. https://github.com/expressjs/express")
+  .argument("[branch]", "git branch to analyze", "main")
+  .option("--json", "output machine readable JSON only (no table, logs or summary)")
+  .option("--verbose", "get detailed progress, warning and scraper logs")
+  .option("--debug", "enable debug-level logs including internal scraper, network, and performance details (very noisy)")
+  .option("--table", "output in tabular format")
+  .option("--summary", "output summary (default)")
   .action(async (repoUrl, branch, options) => {
 
     try {
@@ -109,11 +109,22 @@ Examples:
   $ dura https://github.com/expressjs/express next
   $ dura https://github.com/expressjs/express --json
   $ dura https://github.com/expressjs/express --verbose
-  $ dura https://github.com/expressjs/express --table
   $ dura https://github.com/expressjs/express --table --summary
-  $ dura https://github.com/expressjs/express --verbose
   (all flags are additive in nature except --json)
-`
+
+Additional:
+  # Pretty print
+  dura <repo> --json | jq .
+
+  # Extract fields
+  dura <repo> --json | jq '.dependencies[] | select(.riskLevel=="high")'
+
+  # Save to file
+  dura <repo> --json > report.json
+
+  # Count confirmed breakings
+  dura <repo> --json | jq '[.[] | select(.breakingChange.breaking=="confirmed")] | length'
+  `
 );
 
 program.showHelpAfterError('(use dura --help for usage and additional information)');
