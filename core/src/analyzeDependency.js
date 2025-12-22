@@ -16,7 +16,6 @@ async function analyzeDependency(dep, index, total) {
   let latestVersion = null;
   let githubRepoUrl = null;
   let releaseData = { 
-    breaking: false, 
     keywords: [], 
     text: "",
     breakingChange: {

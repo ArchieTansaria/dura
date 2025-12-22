@@ -23,7 +23,6 @@ async function analyzeRepository({ repoUrl, branch = "main"}) {
   }
 
   return report
-
 }
 
 module.exports = { analyzeRepository };

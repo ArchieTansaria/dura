@@ -6,8 +6,7 @@ const colors = {
   highRiskHeader: chalk.yellow,
   mediumRiskHeader: chalk.cyan,
   dependencyName: chalk.bold,
-  metadata: chalk.dim,
-  helpHint: chalk.gray
+  metadata: chalk.gray
 };
 
 function formatSummary(report) {
@@ -87,9 +86,6 @@ function formatSummary(report) {
     sections.push("No breaking or high-risk dependency changes detected.");
     sections.push("");
   }
-  
-  // Footer
-  sections.push(colors.helpHint(`(Run "dura --help" for additional options)\n`));
   
   return sections.join("\n");
 }

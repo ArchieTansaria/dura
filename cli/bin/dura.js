@@ -7,9 +7,13 @@ const { analyzeRepository } = require("../../core/index");
 const { formatTable } = require("../../core/utils/formatTable")
 const { formatSummary } = require("../../core/utils/formatSummary")
 const { helpInfo } = require("../../core/utils/helpInfo")
-
 const pkg = require("../package.json");
 const { setSilent } = require("../../core/utils/logger");
+const chalk = require("chalk")
+
+const colors = {
+  helpHint: chalk.dim
+};
 
 const program = new Command()
 
@@ -75,12 +79,18 @@ program
             } 
           }
           if (options.summary || (!options.verbose && !options.debug && !options.table)) {
-            console.log("\n" + formatSummary(report) + "\n");
+            console.log("\n" + formatSummary(report));
           }
       }
       if (spinner){
-        spinner.succeed("Analysis complete")
+        spinner.succeed("Analysis complete\n")
       }
+
+      //footer for all flags except json
+      if (!options.json){
+        console.log(colors.helpHint(`(Run "dura --help" for additional options)`))
+      }
+
       } catch (err) {
         if (options.json) {
         // For JSON mode, output structured error to stderr
