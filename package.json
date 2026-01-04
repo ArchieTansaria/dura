@@ -1,7 +1,7 @@
 {
   "name": "dura-kit",
   "version": "1.1.1",
-  "main": "main.js",
+  "main": "index.js",
   "type": "commonjs",
   "scripts": {
     "start": "node main.js",
