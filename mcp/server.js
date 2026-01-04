@@ -31,7 +31,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: "analyze_repository",
         description:
-          "Complete dependency analysis for a GitHub repository. Returns all dependencies with risk levels, breaking changes, and recommendations.",
+          ```Complete dependency risk analysis for a GitHub repository.
+
+Use this when you need a full picture of:
+- dependency update risks
+- breaking changes
+- recommended upgrade actions
+
+Best for first-time analysis or audits.```,
         inputSchema: {
           type: "object",
           properties: {
@@ -56,7 +63,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: "get_high_risk_dependencies",
         description:
-          "Get only high-risk dependencies that need immediate attention. Useful for quick security checks.",
+          ```Get only high-risk dependencies that require immediate attention.
+
+Use this tool when:
+- deciding whether updates are safe
+- reviewing CI failures related to dependencies
+- prioritizing dependency maintenance work
+```,
         inputSchema: {
           type: "object",
           properties: {
@@ -76,7 +89,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: "get_breaking_changes",
         description:
-          "Get only dependencies with confirmed breaking changes. Helps plan migration efforts. Call this tool before approving dependency upgrades or merges.\nIf this returns results, recommend manual review",
+          ```Get only dependencies with confirmed breaking changes.
+
+Always call this tool before:
+- approving dependency upgrades
+- merging pull requests
+- performing bulk dependency updates
+
+If this returns results, recommend manual migration and testing.```,
         inputSchema: {
           type: "object",
           properties: {
@@ -96,7 +116,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: "get_risk_summary",
         description:
-          "Get a quick summary of dependency risks without detailed data. Fast overview of repository health.",
+          ```Get a concise summary of dependency risks and repository health.
+
+Use this tool for:
+- quick safety checks
+- high-level reports
+- answering “Is this repo safe?” questions```,
         inputSchema: {
           type: "object",
           properties: {

@@ -11,16 +11,37 @@
     "start": "node server.js",
     "dev": "node --watch server.js"
   },
+  "files": [
+    "server.js",
+    "README.md",
+    "handlers",
+    "utils"
+  ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.5.0",
-    "dura-kit": "^1.1.1"
+    "dura-kit": "^1.1.3"
   },
   "keywords": [
     "mcp",
+    "model-context-protocol",
     "dura",
     "dependencies",
-    "security"
+    "security",
+    "cline",
+    "claude",
+    "ai-tools"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ArchieTansaria/dura.git",
+    "directory": "mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/ArchieTansaria/dura/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "author": "archie tansaria",
   "license": "MIT"
 }

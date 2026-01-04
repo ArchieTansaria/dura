@@ -287,6 +287,31 @@ npm link
 # Run locally
 dura https://github.com/facebook/react
 ```
+## AI Assistant Integration
+
+DURA integrates seamlessly with Cline and other AI assistants via MCP (Model Context Protocol).
+
+### Quick Setup
+```bash
+# Install MCP server
+npm install -g dura-mcp
+
+# Configure Cline
+# Add to VS Code Settings (JSON):
+{
+  "cline.mcpServers": {
+    "dura": {
+      "command": "dura-mcp"
+    }
+  }
+}
+
+# Restart VS Code
+```
+
+Now ask Cline: "Analyze dependencies for https://github.com/expressjs/express"
+
+[Read full integration guide →](docs/CLINE_INTEGRATION.md)
 
 ## License
 
