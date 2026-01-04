@@ -16,7 +16,8 @@
     "/cli/package-lock.json",
     "/core/src",
     "/core/utils",
-    "/core/index.js"
+    "/core/index.js",
+    "index.js"
   ],
   "keywords": [],
   "author": "archie tansaria",
