@@ -2,7 +2,7 @@
   "name": "dura-mcp",
   "version": "1.0.0",
   "type": "module",
-  "description": "MCP server for DURA - Dependency Update Risk Analyzer",
+  "description": "MCP server for DURA - Dependency Update Risk Analyzer. Integrates with Cline and other AI assistants.",
   "bin": {
     "dura-mcp": "./server.js"
   },
@@ -12,7 +12,8 @@
     "dev": "node --watch server.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^0.5.0"
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "dura-kit": "^1.1.1"
   },
   "keywords": [
     "mcp",

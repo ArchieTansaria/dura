@@ -1,5 +1,5 @@
 import { getCachedResult, setCachedResult, formatFullAnalysis } from "../utils/helper.js";
-import { analyzeRepository } from "../../core/index.js";
+import { analyzeRepository } from "dura-kit";
 
 export async function handleFullAnalysis(args) {
   const { repoUrl, branch = "main", useCache = true } = args;
@@ -15,7 +15,7 @@ export async function handleFullAnalysis(args) {
         content: [
           {
             type: "text",
-            text: formatFullAnalysis(cached, true),
+            text: formatFullAnalysis(cached, true)
           },
         ],
       };

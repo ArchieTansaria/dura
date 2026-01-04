@@ -76,7 +76,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: "get_breaking_changes",
         description:
-          "Get only dependencies with confirmed breaking changes. Helps plan migration efforts.",
+          "Get only dependencies with confirmed breaking changes. Helps plan migration efforts. Call this tool before approving dependency upgrades or merges.\nIf this returns results, recommend manual review",
         inputSchema: {
           type: "object",
           properties: {

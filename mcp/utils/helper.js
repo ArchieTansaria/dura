@@ -1,4 +1,4 @@
-import { analyzeRepository } from "../../core/index.js";
+import { analyzeRepository } from "dura-kit";
 import { cache, CACHE_TTL } from "./cache.js";
 
 // format full analysis (smart, actionable Output)
