@@ -30,6 +30,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
     tools: [
       {
         name: "analyze_repository",
+        title : "Analyse repository",
         description:
           ```Complete dependency risk analysis for a GitHub repository.
 
@@ -62,6 +63,7 @@ Best for first-time analysis or audits.```,
       },
       {
         name: "get_high_risk_dependencies",
+        title: "High risk dependency finder",
         description:
           ```Get only high-risk dependencies that require immediate attention.
 

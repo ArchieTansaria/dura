@@ -1,6 +1,8 @@
 import { getCachedResult, setCachedResult, formatFullAnalysis } from "../utils/helper.js";
 import { analyzeRepository } from "dura-kit";
 
+@mcp.tool() //does this work
+
 export async function handleFullAnalysis(args) {
   const { repoUrl, branch = "main", useCache = true } = args;
 

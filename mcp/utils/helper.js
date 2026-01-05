@@ -53,7 +53,7 @@ export function formatFullAnalysis(result, fromCache) {
       output += `**Current**: \`${dep.currentResolved}\` → **Latest**: \`${dep.latest}\`\n`;
       output += `**Update Type**: ${dep.diff} | **Risk Score**: ${dep.riskScore}/100\n\n`;
       
-      // Why it's risky
+      // why it's risky
       if (dep.breakingChange?.breaking === "confirmed") {
         output += `**Breaking Changes Confirmed** (${(dep.breakingChange.confidenceScore * 100).toFixed(0)}% confidence)\n`;
         if (dep.breakingChange.signals?.strong?.length > 0) {
