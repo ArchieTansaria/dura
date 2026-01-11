@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+//thi is the main file of the mcp
+//however cline doesnt identify any tools whereas mcp inspector does
+
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
@@ -30,16 +33,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
     tools: [
       {
         name: "analyze_repository",
-        title : "Analyse repository",
+        // title : "Analyse repository",
         description:
-          ```Complete dependency risk analysis for a GitHub repository.
-
-Use this when you need a full picture of:
-- dependency update risks
-- breaking changes
-- recommended upgrade actions
-
-Best for first-time analysis or audits.```,
+          "Complete dependency risk analysis for a GitHub repository.\n\nUse this when you need a full picture of:\n- dependency update risks\n- breaking changes\n- recommended upgrade actions\n\nBest for first-time analysis or audits.",
         inputSchema: {
           type: "object",
           properties: {
@@ -63,15 +59,9 @@ Best for first-time analysis or audits.```,
       },
       {
         name: "get_high_risk_dependencies",
-        title: "High risk dependency finder",
+        // title: "High risk dependency finder",
         description:
-          ```Get only high-risk dependencies that require immediate attention.
-
-Use this tool when:
-- deciding whether updates are safe
-- reviewing CI failures related to dependencies
-- prioritizing dependency maintenance work
-```,
+          "Get only high-risk dependencies that require immediate attention.\n\nUse this tool when:\n- deciding whether updates are safe\n- reviewing CI failures related to dependencies\n- prioritizing dependency maintenance work",
         inputSchema: {
           type: "object",
           properties: {
@@ -91,14 +81,7 @@ Use this tool when:
       {
         name: "get_breaking_changes",
         description:
-          ```Get only dependencies with confirmed breaking changes.
-
-Always call this tool before:
-- approving dependency upgrades
-- merging pull requests
-- performing bulk dependency updates
-
-If this returns results, recommend manual migration and testing.```,
+          "Get only dependencies with confirmed breaking changes.\n\nAlways call this tool before:\n- approving dependency upgrades\n- merging pull requests\n- performing bulk dependency updates\n\nIf this returns results, recommend manual migration and testing.",
         inputSchema: {
           type: "object",
           properties: {
@@ -118,12 +101,7 @@ If this returns results, recommend manual migration and testing.```,
       {
         name: "get_risk_summary",
         description:
-          ```Get a concise summary of dependency risks and repository health.
-
-Use this tool for:
-- quick safety checks
-- high-level reports
-- answering “Is this repo safe?” questions```,
+          "Get a concise summary of dependency risks and repository health.\n\\nUse this tool for:\n- quick safety checks\n- high-level reports\n- answering “Is this repo safe?” questions",
         inputSchema: {
           type: "object",
           properties: {
