@@ -1,60 +1,108 @@
 # DURA MCP Server
 
-MCP (Model Context Protocol) server for [DURA](https://github.com/ArchieTansaria/dura) - Dependency Update Risk Analyzer.
+MCP (Model Context Protocol) server for [DURA](https://github.com/ArchieTansaria/dura) – Dependency Update Risk Analyzer. [modelcontextprotocol](https://modelcontextprotocol.io/docs/learn/server-concepts)
 
-Integrates DURA's dependency analysis capabilities with AI assistants like Cline, Claude Desktop, and any MCP-compatible client.
+Integrates DURA's dependency analysis capabilities with AI coding assistants (Cline, Cursor, Claude Code, Continue.dev, etc.) and desktop apps like Claude Desktop that support MCP servers. [modelcontextprotocol](https://modelcontextprotocol.io/clients)
+
+***
 
 ## Quick Start
 
-### Installation
+### 1. Installation
 
 ```bash
+# Global install (recommended)
 npm install -g dura-mcp
+
+# Or use npx (no install needed)
+npx dura-mcp
 ```
 
-This automatically makes `dura-mcp` available globally. The server will use `dura-kit` via npx when needed.
+The MCP server internally uses `dura-kit` to perform dependency analysis. [github](https://github.com/ArchieTansaria/dura)
 
-### Usage with Cline (VS Code)
+### 2. Generic MCP Configuration (All Major Clients)
 
-1. **Install the MCP server:**
-   ```bash
-   npm install -g dura-mcp
-   ```
+Add this entry to your AI agent’s MCP configuration (the exact file/setting path differs per client, but the JSON structure is the same): [modelcontextprotocol](https://modelcontextprotocol.io/docs/learn/server-concepts)
 
-2. **Configure Cline:**
-   
-   Open VS Code Settings (JSON):
-   - Press `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Windows/Linux)
-   - Type: "Preferences: Open User Settings (JSON)"
-   - Add the following:
+```json
+{
+  "mcpServers": {
+    "dura": {
+      "command": "npx",
+      "args": ["dura-mcp"],
+      "cwd": "${workspaceFolder}"
+    }
+  }
+}
+```
 
-   ```json
-   {
-     "cline.mcpServers": {
-       "dura": {
-         "command": "dura-mcp"
-       }
-     }
-   }
-   ```
+This pattern works for:
 
-3. **Restart VS Code**
+- Cline (VS Code)
+- Cursor
+- Claude Desktop / Claude Code
+- Continue.dev
+- Other MCP-compatible IDE and desktop clients that accept an `mcpServers` JSON block. [airbyte](https://airbyte.com/blog/pyairbyte-mcp-now-supports-cline-cursor-claude-desktop-warp)
 
-4. **Use it with Cline:**
-   
-   Open Cline and ask natural questions:
-   - "Analyze dependencies for https://github.com/expressjs/express"
-   - "What are the high-risk dependencies in React?"
-   - "Show me breaking changes in Next.js"
-   - "Is it safe to update my dependencies?"
+`cwd` is set to `${workspaceFolder}` so the server runs relative to your current project and can resolve local dependencies or configuration correctly. [github](https://github.com/ArchieTansaria/dura)
 
-### Usage with Claude Desktop
+| Client | Config Location |
+|--------|-----------------|
+| Cline | VS Code Settings → MCP |
+| Cursor | Settings → MCP Servers |
+| Claude Desktop | `~/Library/Application Support/Claude/` |
+| Continue.dev | `~/.continue/mcp.json` |
+| Roo Code | Settings → Tools |
 
-Add to your Claude Desktop configuration file:
+**491+ MCP clients** - [Full list](https://www.pulsemcp.com/clients)
 
-**macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+***
 
-**Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+## Configuration Fallbacks
+
+If `npx dura-mcp` does not work in your environment, you can fall back to local or absolute paths as needed. [zuplo](https://zuplo.com/blog/mcp-resources)
+
+### Option A: Local Project Install
+
+Install locally in your project:
+
+```bash
+npm install dura-mcp
+```
+
+Then configure:
+
+```json
+{
+  "mcpServers": {
+    "dura": {
+      "command": "node",
+      "args": ["./node_modules/.bin/dura-mcp"],
+      "cwd": "${workspaceFolder}"
+    }
+  }
+}
+```
+
+### Option B: Absolute Path
+
+Useful for global or non-standard installs:
+
+```json
+{
+  "mcpServers": {
+    "dura": {
+      "command": "node",
+      "args": ["/full/path/to/your/project/node_modules/.bin/dura-mcp"],
+      "cwd": "/full/path/to/your/project"
+    }
+  }
+}
+```
+
+### Option C: Global Binary
+
+If `npm install -g dura-mcp` is used and `dura-mcp` is on your PATH: [github](https://github.com/ArchieTansaria/dura)
 
 ```json
 {
@@ -66,239 +114,173 @@ Add to your Claude Desktop configuration file:
 }
 ```
 
-Restart Claude Desktop and start asking about dependencies!
+***
+
+## Verifying the Server in Terminal
+
+From your project root (the same directory used as `cwd`):
+
+```bash
+# 1) Start the server
+npx dura-mcp
+
+# 2) List tools via MCP
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | npx dura-mcp
+
+# 3) Call a tool directly
+echo '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"get_risk_summary","arguments":{"repoUrl":"https://github.com/expressjs/express"}}}' | npx dura-mcp
+```
+
+If everything is wired correctly, you should see a JSON response listing four tools on `tools/list` and a structured result for `get_risk_summary` rather than an internal error. [github](https://github.com/ArchieTansaria/dura)
+
+***
 
 ## Available Tools
 
-The DURA MCP server provides four specialized tools that AI assistants can use:
+The DURA MCP server provides four tools for dependency risk analysis. [github](https://github.com/ArchieTansaria/dura)
 
 ### 1. `analyze_repository`
 
 Complete dependency analysis with detailed risk assessment and actionable recommendations.
 
-**Parameters:**
-- `repoUrl` (required): GitHub repository URL (e.g., `https://github.com/facebook/react`)
-- `branch` (optional): Git branch to analyze (default: `main`)
-- `useCache` (optional): Use cached results if available (default: `true`)
+**Parameters**
 
-**Returns:**
-- Health score and risk summary
+- `repoUrl` (required): GitHub repository URL, for example `https://github.com/facebook/react`
+- `branch` (optional): Git branch to analyze, default `main`
+- `useCache` (optional): Use cached results if available, default `true`
+
+**Returns**
+
+- Overall health score and risk summary
 - Critical issues requiring attention
 - Breaking changes with evidence
 - Prioritized action items
 - Suggested update order
 
-**Example:**
-```
-User: "Analyze dependencies for https://github.com/expressjs/express"
-
-AI receives:
-- Health Score: 68/100
-- 3 high-risk dependencies
-- 2 breaking changes
-- Specific actions to take
-```
-
 ### 2. `get_high_risk_dependencies`
 
-Get only dependencies with high risk that need immediate attention.
+Focuses on only the highest-risk dependencies that require immediate attention.
 
-**Parameters:**
+**Parameters**
+
 - `repoUrl` (required): GitHub repository URL
-- `branch` (optional): Git branch (default: `main`)
+- `branch` (optional): Git branch, default `main`
 
-**Returns:**
-- List of high-risk dependencies only
-- Why each is high-risk
-- Specific recommendations for each
-- Update priority guidance
+**Returns**
 
-**Example:**
-```
-User: "What are the risky dependencies in React?"
-
-AI gets only the critical dependencies that need review.
-```
+- List of high-risk dependencies
+- Explanation of why each is high risk
+- Specific recommendations and priority guidance
 
 ### 3. `get_breaking_changes`
 
-Get only dependencies with confirmed breaking changes.
+Returns only dependencies with confirmed breaking changes.
 
-**Parameters:**
+**Parameters**
+
 - `repoUrl` (required): GitHub repository URL
-- `branch` (optional): Git branch (default: `main`)
+- `branch` (optional): Git branch, default `main`
 
-**Returns:**
+**Returns**
+
 - Dependencies with confirmed breaking changes
-- Confidence scores
-- Evidence from release notes
-- Migration planning guidance
-
-**Example:**
-```
-User: "Show me breaking changes in Next.js"
-
-AI gets specific breaking changes and how to handle them.
-```
+- Confidence scores and supporting evidence from release notes
+- Migration and upgrade guidance
 
 ### 4. `get_risk_summary`
 
-Quick health check and risk overview without detailed data.
+Lightweight health check and risk overview.
 
-**Parameters:**
+**Parameters**
+
 - `repoUrl` (required): GitHub repository URL
-- `branch` (optional): Git branch (default: `main`)
+- `branch` (optional): Git branch, default `main`
 
-**Returns:**
-- Health score (0-100)
+**Returns**
+
+- Health score (0–100)
 - Risk distribution (high/medium/low)
-- Quick status assessment
-- Overall recommendation
+- Overall status and recommendation
 
-**Example:**
-```
-User: "Is my project safe to update?"
+***
 
-AI gets instant health score and quick answer.
-```
+## Typical AI Usage Patterns
 
-## Features
+These examples illustrate how AI assistants tend to use the tools; they are not strict requirements: [github](https://github.com/ArchieTansaria/dura)
 
-- **Smart Caching**: Analysis results cached for 1 hour to speed up repeated queries
-- **Actionable Output**: Prioritized recommendations, not just data dumps
-- **Breaking Change Detection**: Scrapes GitHub releases to find confirmed breaking changes
-- **Risk Scoring**: Intelligent risk assessment based on version changes and breaking signals
-- **Multiple Tools**: Specialized tools for different use cases (overview, deep-dive, specific filters)
+- Quick check:  
+  “Is it safe to update my dependencies?” → `get_risk_summary`
+- Deep audit:  
+  “Analyze dependencies for https://github.com/expressjs/express” → `analyze_repository`
+- Critical-only view:  
+  “What are the risky dependencies in React?” → `get_high_risk_dependencies`
+- Upgrade planning:  
+  “What breaking changes do I need to worry about?” → `get_breaking_changes`
 
-## Usage Examples
-
-### Quick Health Check
-
-```
-User: "Is express safe to update?"
-
-AI: [calls get_risk_summary]
-"Express has a health score of 72/100. There are 3 high-risk 
-dependencies that need attention. Would you like details?"
-```
-
-### Detailed Analysis
-
-```
-User: "Analyze all dependencies in my project"
-
-AI: [calls analyze_repository]
-"I found 2 critical issues:
-1. eslint (breaking changes confirmed)
-2. webpack (major version jump)
-
-Here's the recommended update order..."
-```
-
-### Focus on Critical Issues
-
-```
-User: "What breaking changes do I need to worry about?"
-
-AI: [calls get_breaking_changes]
-"Found 2 dependencies with breaking changes:
-- eslint: Config syntax changed in v9
-- react: New JSX transform required
-
-I recommend updating eslint first..."
-```
-
-### Repository Comparison
-
-```
-User: "Compare dependency health of express vs fastify"
-
-AI: [calls get_risk_summary for both]
-"Express: Health score 72/100, 3 high-risk deps
-Fastify: Health score 89/100, 0 high-risk deps
-
-Fastify is in better shape for updates."
-```
+***
 
 ## How It Works
 
-1. **AI Assistant** receives a question about dependencies
-2. **MCP Server** provides tools the AI can call
-3. **AI chooses** the appropriate tool (full analysis, high-risk filter, etc.)
-4. **MCP Server** runs `dura-kit` CLI to analyze the repository
-5. **Results** are formatted and returned to the AI
-6. **AI presents** findings in natural language to the user
+1. The AI assistant receives a dependency-related question.
+2. The MCP client lists available tools from the DURA MCP server.
+3. The AI chooses the appropriate tool (full analysis, high-risk only, breaking changes, or summary).
+4. The MCP server runs the `dura-kit` CLI to analyze the target repository. [github](https://github.com/ArchieTansaria/dura)
+5. Results are normalized into structured JSON and returned via MCP.
+6. The AI formats the findings into natural language and follow-up recommendations.
 
-The MCP server acts as a bridge between AI assistants and DURA's analysis engine.
+***
 
 ## Caching Behavior
 
-Analysis results are cached for 1 hour to improve performance:
+The MCP server caches repository analyses for one hour: [github](https://github.com/ArchieTansaria/dura)
 
-- First query: Fetches fresh data (5-10 seconds)
-- Subsequent queries: Returns cached data instantly
-- Cache expires: After 1 hour, fresh data fetched automatically
-- Force refresh: Set `useCache: false` in parameters
+- First query: Fetches fresh data, typically a few seconds.
+- Repeated queries: Served from cache for the same repository and branch.
+- Cache expiry: After one hour, the next call re-runs analysis.
+- Manual refresh: Set `useCache: false` for `analyze_repository` to force a fresh run.
 
-Cache is shared across all tools, so analyzing a repository once makes all other tools fast.
+Cache is shared across tools, so one full analysis speeds up subsequent summary or filtered calls for the same repository. [github](https://github.com/ArchieTansaria/dura)
+
+***
 
 ## Requirements
 
-- **Node.js**: 18.0.0 or higher
-- **Internet**: Required for GitHub and npm API access
-- **Public Repositories**: Currently only supports public GitHub repositories
+- Node.js 18.0.0 or higher
+- Internet access (GitHub and npm APIs)
+- Currently supports public GitHub repositories with a `package.json` in the root directory [github](https://github.com/ArchieTansaria/dura)
+
+***
 
 ## Troubleshooting
 
-### Command not found: dura-mcp
+### Command Not Found: `dura-mcp`
 
-**Solution:** Ensure the package is installed globally:
 ```bash
 npm install -g dura-mcp
-which dura-mcp  # Should show installation path
+which dura-mcp
 ```
 
-### Cline doesn't see the MCP server
+Ensure the printed path is on your `PATH` and update your configuration to use either `dura-mcp` (global) or `npx dura-mcp` as described above. [github](https://github.com/ArchieTansaria/dura)
 
-**Solutions:**
-1. Restart VS Code completely (close all windows)
-2. Verify settings are saved correctly
-3. Check for errors in VS Code Developer Tools: `Help → Toggle Developer Tools → Console`
+### MCP Client Does Not Show Tools
 
-### MCP server not connecting
+- Confirm your config uses one of the working patterns above (especially `cwd`).
+- Restart the client fully after editing MCP config.
+- Open the client’s developer tools/console and check for spawn errors or path issues. [docs.cline](https://docs.cline.bot/mcp/configuring-mcp-servers)
 
-**Solutions:**
-1. Test the server manually: Run `dura-mcp` in terminal - it should say "Server running"
-2. Check Node.js version: `node --version` (must be 18+)
-3. Reinstall if needed: `npm uninstall -g dura-mcp && npm install -g dura-mcp`
+### Server Runs But Calls Fail
 
-### Analysis fails or times out
+- Run `echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | npx dura-mcp` from the same directory as `cwd`.
+- If this fails, adjust `cwd` and `args` until terminal tests succeed, then mirror that in your MCP config. [modelcontextprotocol](https://modelcontextprotocol.io/specification/draft/server/resources)
 
-**Common causes:**
-- Invalid or private repository URL
-- Network connectivity issues
-- Repository doesn't contain package.json
+### Analysis Errors
 
-**Solutions:**
-1. Verify repository is public: Visit the URL in a browser
-2. Check internet connection
-3. Test with DURA CLI directly: `npx dura-kit <repo-url>`
-4. Check repository has package.json in the root
+- Verify the repository URL is public and valid.
+- Ensure the repo contains `package.json` at the root.
+- Test the underlying CLI directly:  
+  `npx dura-kit https://github.com/owner/repo` [github](https://github.com/ArchieTansaria/dura)
 
-### "Repository not found" error
-
-**Solutions:**
-- Ensure URL format is correct: `https://github.com/owner/repo`
-- Repository must be public (private repos not supported)
-- Check repository actually exists
-
-### Rate limiting
-
-GitHub API rate limits may affect analysis:
-- Unauthenticated: 60 requests/hour
-- Authenticated: 5000 requests/hour (future feature)
-
-**Solution:** Wait a few minutes before retrying.
+***
 
 ## Development
 
@@ -311,28 +293,26 @@ npm install
 node server.js
 ```
 
-The server will start and wait for MCP protocol messages on stdin.
+The server starts and waits for MCP JSON-RPC messages on stdin. [github](https://github.com/ArchieTansaria/dura)
 
-### Testing
-
-Use the MCP Inspector to test the server:
+### Testing with MCP Inspector
 
 ```bash
 npm install -g @modelcontextprotocol/inspector
 npx @modelcontextprotocol/inspector node server.js
 ```
 
-Then test each tool in the web interface.
+Use the inspector UI to list tools, call each one, and inspect responses. [modelcontextprotocol](https://modelcontextprotocol.info/docs/concepts/resources/)
 
-### Local Development with Cline
+### Local Development with an MCP Client
 
 ```bash
 cd dura/mcp
 npm link
 
-# Add to VS Code settings:
+# Then in your MCP client config:
 {
-  "cline.mcpServers": {
+  "mcpServers": {
     "dura": {
       "command": "dura-mcp"
     }
@@ -340,35 +320,17 @@ npm link
 }
 ```
 
+***
+
 ## Links
 
-- **DURA CLI**: [dura-kit on npm](https://www.npmjs.com/package/dura-kit)
-- **GitHub Repository**: [ArchieTansaria/dura](https://github.com/ArchieTansaria/dura)
-- **MCP Documentation**: [Model Context Protocol](https://modelcontextprotocol.io)
-- **Report Issues**: [GitHub Issues](https://github.com/ArchieTansaria/dura/issues)
+- DURA CLI: [dura-kit on npm](https://www.npmjs.com/package/dura-kit)
+- GitHub Repository: [ArchieTansaria/dura](https://github.com/ArchieTansaria/dura)
+- MCP Documentation: [Model Context Protocol](https://modelcontextprotocol.io)
+- Issues: [GitHub Issues](https://github.com/ArchieTansaria/dura/issues)
 
-## Related Packages
-
-- **dura-kit** - The core CLI tool for dependency analysis
-  ```bash
-  npm install -g dura-kit
-  dura https://github.com/expressjs/express
-  ```
-
-## Contributing
-
-Contributions welcome! See the [main repository](https://github.com/ArchieTansaria/dura) for contribution guidelines.
+***
 
 ## License
 
-MIT License - see [LICENSE](https://github.com/ArchieTansaria/dura/blob/main/LICENSE) file for details.
-
-## Support
-
-- Documentation: [GitHub Repository](https://github.com/ArchieTansaria/dura)
-- Issues: [GitHub Issues](https://github.com/ArchieTansaria/dura/issues)
-- Discussions: [GitHub Discussions](https://github.com/ArchieTansaria/dura/discussions)
-
----
-
-**Built with Model Context Protocol for seamless AI integration**
+MIT License – see the [LICENSE](https://github.com/ArchieTansaria/dura/blob/main/LICENSE) file for details.
