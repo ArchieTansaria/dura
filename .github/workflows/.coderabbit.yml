@@ -1,0 +1,6 @@
+name: DURA github actions test
+run-name: ${{github.actor}} is testing out DURA
+on: pull-request
+jobs: explore-dura:
+  runs-on: ubuntu-latest
+rules: 
