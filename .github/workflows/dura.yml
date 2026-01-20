@@ -1,0 +1,28 @@
+name: DURA Dependency Risk Check
+on: 
+  push:
+    branches:
+      - main
+  pull_request :
+    paths:
+      - package.json
+      - package-lock.json
+      - pnpm-lock.yaml
+      - yarn.lock
+jobs:
+  dura:
+    runs-on: ubuntu-latest
+    container: node:22
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install Node
+        uses: actions/setup-node@v
+        with: 
+          node-version: 22
+      - name: Install dura
+        run: npm i -g dura-kit
+      - name: Run Dura
+        run: dura https://github.com/${{ github.repository }} --json > dura.json
+      - name: Comment on PR
+        uses: 
+
