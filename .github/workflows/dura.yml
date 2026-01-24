@@ -1,4 +1,8 @@
 name: DURA Dependency Risk Check
+permissions:
+  contents: read
+  issues: write 
+  pull-requests: write 
 on: 
   push:
     branches:
@@ -9,20 +13,87 @@ on:
       - package-lock.json
       - pnpm-lock.yaml
       - yarn.lock
-jobs:
+jobs: 
   dura:
     runs-on: ubuntu-latest
     container: node:22
     steps:
       - uses: actions/checkout@v6
       - name: Install Node
-        uses: actions/setup-node@v
+        uses: actions/setup-node@v6
         with: 
           node-version: 22
       - name: Install dura
         run: npm i -g dura-kit
       - name: Run Dura
         run: dura https://github.com/${{ github.repository }} --json > dura.json
+      - name: Upload report artifact
+        uses: actions/upload-artifact@v6
+        with: 
+          name: DURA Analysis
+          path: dura.json
       - name: Comment on PR
-        uses: 
+        uses: actions/github-script@v8
+        with: 
+          script: |
+            const fs = require("fs");
+
+            const report = JSON.parse(
+              fs.readFileSync("dura.json", "utf8")
+            )
+
+            const breaking = report.filter(
+              d => d.breakingChange?.breaking === "confirmed"
+            )
+
+            const highRisk = report.filter(
+              d => d.riskLevel === "high"
+            )
+
+            const mediumRisk = report.filter(
+              d => d.breakingChange?.breaking === "low"
+            )
+
+            if (breaking.length === 0 && highRisk.length === 0) {
+              console.log("No breaking or high-risk dependencies found. Skipping comment.")
+              return
+            }
+
+            let body = `# DURA Dependency Risk Analysis\n\n`;
+
+            if (breaking.length > 0) {
+              body += `## Confirmed Breaking Changes (${breaking.length})\n`;
+              body += breaking
+                .map(d =>
+                  `- **${d.name}** (${d.type}) → ${d.diff} update`
+                )
+                .join("\n");
+              body += "\n\n";
+            }
+
+            if (highRisk.length > 0) {
+              body += `## High-Risk Updates (${highRisk.length})\n`;
+              body += highRisk
+                .map(d =>
+                  `- **${d.name}** (${d.type}) → ${d.currentResolved} → ${d.latest}`
+                )
+                .join("\n");
+              body += "\n\n";
+            }
+
+            body += `
+            ### Recommendations
+            - Review changelogs and migration guides
+            - Update dependencies incrementally
+            - Run full test suite before merging
+
+            Full report available as workflow artifact: \`dura-report.json\`
+            `;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            })
+
 
