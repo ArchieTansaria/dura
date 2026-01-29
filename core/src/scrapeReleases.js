@@ -20,8 +20,7 @@ try {
   await browser.close()
 } catch {
   console.error(
-  "\ndura requires Playwright Chromium to be installed.\n" +
-  "Run: npx playwright install chromium --with-deps\n"
+    "\ndura setup required\n\nRun:\n\tdura setup\n(Installs Playwright Chromium used for release analysis)\n"
   )
   process.exit(1)
 }}

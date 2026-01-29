@@ -4,11 +4,11 @@ const {
   extractGithubRepoUrl,
 } = require("./npmInfo");
 const { semverDiff } = require("./semverDiff");
-const { scrapeReleases } = require("./scrapeReleases");
+const { scrapeReleases, normalizeGitHubUrl } = require("./scrapeReleases");
 const { computeRisk } = require("./risk");
 const { logStep } = require("../utils/logger");
 
-async function analyzeDependency(dep, index, total) {
+async function analyzeDependency(dep, index, total, preScrapedResult = null, preKnownGithubUrl = null) {
   const { name, range, type } = dep;
   logStep(`[${index + 1}/${total}] Processing ${name}...`);
 
@@ -35,7 +35,7 @@ async function analyzeDependency(dep, index, total) {
   try {
     npmJson = await fetchNpmInfo(name);
     latestVersion = extractLatestVersion(npmJson);
-    githubRepoUrl = extractGithubRepoUrl(npmJson);
+    githubRepoUrl = preKnownGithubUrl || extractGithubRepoUrl(npmJson);
 
     // console.log(npmJson)
     // console.log(latestVersion)
@@ -48,25 +48,36 @@ async function analyzeDependency(dep, index, total) {
     // console.log(diffResult)
 
     if (githubRepoUrl) {
-      try {
-        releaseData = await scrapeReleases(githubRepoUrl);
-      } catch (error) {
-        logStep(`⚠ Scraping failed for ${name}, using fallback`);
-        releaseData = { 
-          breaking: false, 
-          keywords: [], 
-          text: "",
-          breakingChange: {
-            breaking: 'unknown',
-            confidenceScore: 0,
-            signals: {
-              strong: [],
-              medium: [],
-              weak: [],
-              negated: false
+      // Use pre-scraped result if available, otherwise scrape individually
+      if (preScrapedResult) {
+        // Log "Navigating to..." to maintain log order even with pre-scraped results
+        const baseUrl = normalizeGitHubUrl(githubRepoUrl);
+        if (baseUrl) {
+          logStep(`Navigating to ${baseUrl}/releases`);
+          logStep('Crawl complete');
+        }
+        releaseData = preScrapedResult;
+      } else {
+        try {
+          releaseData = await scrapeReleases(githubRepoUrl);
+        } catch (error) {
+          logStep(`⚠ Scraping failed for ${name}, using fallback`);
+          releaseData = { 
+            breaking: false, 
+            keywords: [], 
+            text: "",
+            breakingChange: {
+              breaking: 'unknown',
+              confidenceScore: 0,
+              signals: {
+                strong: [],
+                medium: [],
+                weak: [],
+                negated: false
+              }
             }
-          }
-        };
+          };
+        }
       }
     }
 
