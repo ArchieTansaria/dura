@@ -76,9 +76,11 @@ program
         setSilent(false)
       }
 
+      const scrapeMode = (options.verbose || options.debug) ? "sequential" : "batch";
       const report = await analyzeRepository({
         repoUrl,
-        branch
+        branch,
+        scrapeMode,
       });
 
       if (spinner) {
