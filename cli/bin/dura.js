@@ -24,7 +24,7 @@ program
   .version(pkg.version);
 
 program
-  .command("setup")
+  .command("setup") 
   .description("Installs Playwright browsers required for dura analysis")
   .action(() => {
     console.error(chalk.cyan("Installing Playwright chromium"))
