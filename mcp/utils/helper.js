@@ -199,7 +199,7 @@ export async function getOrFetchAnalysis(repoUrl, branch) {
     return cached;
   }
 
-  const result = await analyzeRepository({ repoUrl, branch });
+  const result = await analyzeRepository({ repoUrl, branch, scrapeMode: "batch" });
   setCachedResult(repoUrl, branch, result);
   return result;
 }
