@@ -3,13 +3,14 @@
 //entrypoint for cli
 
 const { Command } = require("commander")
+const { execSync } = require("child_process")
 const { analyzeRepository } = require("../../core/index");
 const { formatTable } = require("../../core/utils/formatTable")
 const { formatSummary } = require("../../core/utils/formatSummary")
 const { helpInfo } = require("../../core/utils/helpInfo")
 const pkg = require("../package.json");
 const { setSilent } = require("../../core/utils/logger");
-const chalk = require("chalk")
+const chalk = require("chalk");
 
 const colors = {
   helpHint: chalk.dim
@@ -21,6 +22,24 @@ program
   .name("dura")
   .usage("<github-repo-url> [branch] [options]")
   .version(pkg.version);
+
+program
+  .command("setup")
+  .description("Installs Playwright browsers required for dura analysis")
+  .action(() => {
+    console.error(chalk.cyan("Installing Playwright chromium"))
+    try {
+      execSync(
+        "npx playwright install chromium --with-deps",
+        { stdio: "inherit" }
+      )
+      console.error("\nDURA setup complete.")
+    } catch (error) {
+      console.error(chalk.red("\nSetup failed"));
+      process.exit(1);
+    }
+  })
+
 
 program
   .argument("<repoUrl>", "gitHub repository URL e.g. https://github.com/expressjs/express")
