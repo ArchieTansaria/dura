@@ -106,31 +106,8 @@ function normalizeGitHubUrl(url) {
   return clean.replace(/\/+$/, '');
 }
 
-async function scrapeReleases(repoUrl) {
-  const baseUrl = normalizeGitHubUrl(repoUrl);
-
-  if (!baseUrl) {
-    return { 
-      breaking: false, 
-      keywords: [], 
-      text: "",
-      breakingChange: {
-        breaking: 'unknown',
-        confidenceScore: 0,
-        signals: {
-          strong: [],
-          medium: [],
-          weak: [],
-          negated: false
-        }
-      }
-    };
-  }
-
-  const releasesUrl = `${baseUrl}/releases`;
-  logStep(`Navigating to ${releasesUrl}`);
-
-  let result = {
+function defaultReleaseResult() {
+  return {
     breaking: false,
     keywords: [],
     text: '',
@@ -145,6 +122,19 @@ async function scrapeReleases(repoUrl) {
       }
     }
   };
+}
+
+async function scrapeReleases(repoUrl) {
+  const baseUrl = normalizeGitHubUrl(repoUrl);
+
+  if (!baseUrl) {
+    return defaultReleaseResult();
+  }
+
+  const releasesUrl = `${baseUrl}/releases`;
+  logStep(`Navigating to ${releasesUrl}`);
+
+  let result = defaultReleaseResult();
 
   // logStep(`➡️ Visiting Releases Page: ${releasesUrl}`);
   
@@ -164,6 +154,37 @@ async function scrapeReleases(repoUrl) {
     // await crawler.teardown();
   }
   return result;
+}
+
+/**
+ * Batch scrape release pages for multiple repos in one crawler run.
+ * Used by MCP/CI for speed and stability. No per-URL logStep (quiet).
+ * @param {string[]} repoUrls - GitHub repo URLs
+ * @returns {Promise<Map<string, object>>} Map of normalized base URL -> release result
+ */
+async function scrapeManyReleases(repoUrls) {
+  const baseUrls = [...new Set((repoUrls || []).map(normalizeGitHubUrl).filter(Boolean))];
+  if (baseUrls.length === 0) {
+    return new Map();
+  }
+
+  const requests = baseUrls.map((baseUrl) => ({
+    url: `${baseUrl}/releases`,
+    userData: { result: defaultReleaseResult(), baseUrl }
+  }));
+
+  const crawler = await getCrawler();
+  try {
+    await crawler.run(requests);
+  } catch (error) {
+    console.error(`Crawler error: ${error.message}`);
+  }
+
+  const map = new Map();
+  for (const r of requests) {
+    map.set(r.userData.baseUrl, r.userData.result);
+  }
+  return map;
 }
 
 // lifecycle cleanup (module-level)
@@ -189,7 +210,9 @@ process.once('exit', async () => {
 
 module.exports = {
   scrapeReleases,
+  scrapeManyReleases,
   normalizeGitHubUrl,
+  defaultReleaseResult,
   assertBrowserAvailable
 };
 

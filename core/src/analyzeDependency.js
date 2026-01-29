@@ -4,9 +4,26 @@ const {
   extractGithubRepoUrl,
 } = require("./npmInfo");
 const { semverDiff } = require("./semverDiff");
-const { scrapeReleases, normalizeGitHubUrl } = require("./scrapeReleases");
+const { scrapeReleases, normalizeGitHubUrl, defaultReleaseResult } = require("./scrapeReleases");
 const { computeRisk } = require("./risk");
 const { logStep } = require("../utils/logger");
+
+function buildReportItem(dep, diffResult, releaseData, riskResult) {
+  const { name, range, type } = dep;
+  return {
+    name,
+    type,
+    currentRange: range,
+    currentResolved: diffResult.currentResolved,
+    latest: releaseData.latest !== undefined ? releaseData.latest : undefined,
+    diff: diffResult.diff,
+    breakingChange: releaseData.breakingChange,
+    riskScore: riskResult.score,
+    riskLevel: riskResult.level,
+    githubRepoUrl: releaseData.githubRepoUrl !== undefined ? releaseData.githubRepoUrl : undefined,
+    releaseKeywords: releaseData.keywords,
+  };
+}
 
 async function analyzeDependency(dep, index, total, preScrapedResult = null, preKnownGithubUrl = null) {
   const { name, range, type } = dep;
@@ -15,20 +32,7 @@ async function analyzeDependency(dep, index, total, preScrapedResult = null, pre
   let npmJson = null;
   let latestVersion = null;
   let githubRepoUrl = null;
-  let releaseData = { 
-    keywords: [], 
-    text: "",
-    breakingChange: {
-      breaking: 'unknown',
-      confidenceScore: 0,
-      signals: {
-        strong: [],
-        medium: [],
-        weak: [],
-        negated: false
-      }
-    }
-  };
+  let releaseData = defaultReleaseResult();
   let diffResult = { diff: "unknown", currentResolved: null };
   let riskResult = { score: 0, level: "low" };
 
@@ -62,21 +66,7 @@ async function analyzeDependency(dep, index, total, preScrapedResult = null, pre
           releaseData = await scrapeReleases(githubRepoUrl);
         } catch (error) {
           logStep(`⚠ Scraping failed for ${name}, using fallback`);
-          releaseData = { 
-            breaking: false, 
-            keywords: [], 
-            text: "",
-            breakingChange: {
-              breaking: 'unknown',
-              confidenceScore: 0,
-              signals: {
-                strong: [],
-                medium: [],
-                weak: [],
-                negated: false
-              }
-            }
-          };
+          releaseData = defaultReleaseResult();
         }
       }
     }
@@ -90,19 +80,12 @@ async function analyzeDependency(dep, index, total, preScrapedResult = null, pre
     logStep(`⚠ Error processing ${name}: ${error.message}`);
   }
 
-  return {
-    name,
-    type,
-    currentRange: range,
-    currentResolved: diffResult.currentResolved,
-    latest: latestVersion,
-    diff: diffResult.diff,
-    breakingChange: releaseData.breakingChange,
-    riskScore: riskResult.score,
-    riskLevel: riskResult.level,
-    githubRepoUrl,
-    releaseKeywords: releaseData.keywords,
-  };
+  return buildReportItem(
+    dep,
+    diffResult,
+    { ...releaseData, latest: latestVersion, githubRepoUrl },
+    riskResult
+  );
 }
 
-module.exports = { analyzeDependency }
+module.exports = { analyzeDependency, buildReportItem };
