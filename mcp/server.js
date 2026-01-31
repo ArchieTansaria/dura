@@ -1,8 +1,5 @@
 #!/usr/bin/env node
 
-//thi is the main file of the mcp
-//however cline doesnt identify any tools whereas mcp inspector does
-
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {

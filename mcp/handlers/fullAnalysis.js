@@ -23,7 +23,7 @@ export async function handleFullAnalysis(args) {
   }
 
   // Fetch fresh data
-  const result = await analyzeRepository({ repoUrl, branch });
+  const result = await analyzeRepository({ repoUrl, branch, scrapeMode: "batch" });
 
   // Cache result
   setCachedResult(repoUrl, branch, result);
