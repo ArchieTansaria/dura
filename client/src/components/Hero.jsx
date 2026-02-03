@@ -2,7 +2,7 @@ import { InteractiveSelector } from './InteractiveSelector';
 
 export function Hero() {
   return (
-    <section className="pt-24 mt-10 pb-16 px-4 md:pt-32 md:pb-24">
+    <section className="pt-24 pb-16 px-4 md:pt-32 md:pb-24">
       <div className="max-w-4xl mx-auto text-center">
         <h1 className="text-4xl md:text-6xl mt-10 font-bold tracking-tight text-primary mb-6">
           Analyze dependency update risk <br className="hidden md:block"/>
