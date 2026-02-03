@@ -4,7 +4,7 @@ RUN npx playwright install chromium --with-deps
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY package*.json ./ 
 
 RUN npm ci --only=production
 
