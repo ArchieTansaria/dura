@@ -1,7 +1,7 @@
 // this is the installation identity of the octokit client instance
 
 import { App } from '@octokit/app'
-import { getEnv } from '../utils/envValidator'
+import { getEnv } from '../utils/envValidator.js'
 
 export default new App({
   appId: Number(getEnv("GITHUB_APP_ID")),

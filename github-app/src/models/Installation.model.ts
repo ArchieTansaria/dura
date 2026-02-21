@@ -34,7 +34,4 @@ const InstallationSchema = new mongoose.Schema({
   }
 })
 
-//adding index for faster lookup
-InstallationSchema.index({ installationId: 1 })
-
 export const Installation = mongoose.model('Installation', InstallationSchema)

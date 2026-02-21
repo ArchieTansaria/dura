@@ -1,14 +1,13 @@
+import 'dotenv/config'
 import express from 'express'
 import mongoose from 'mongoose'
-import dotenv from 'dotenv'
 import morgan from 'morgan'
-import session from 'express-session'
+import { sessionMiddleware } from './config/session.js'
 import type { Express } from 'express'
 
-import { testQueue } from './queues/prAnalysisQueue'
-import { getEnv } from './utils/envValidator'
-
-dotenv.config({ path: "./.env" })
+import { testQueue } from './queues/prAnalysisQueue.js'
+import { router as authRouter } from './routes/auth.route.js'
+import { router as dashboardRouter } from './routes/dashboard.route.js'
 
 const app:Express = express()
 app.use(morgan('dev'))
@@ -25,19 +24,15 @@ async function connectToDB(): Promise<void> {
 connectToDB()
 testQueue()
 
-app.use(session({
-  secret: getEnv('SESSION_SECRET'),
-  resave: false,
-  saveUninitialized: false,
-  cookie: { 
-    secure: false, // set to true in production with HTTPS
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  }
-}));
+//using redis for session management
+app.use(sessionMiddleware);
 
 app.get("/", (req, res) => {
   res.send("this is durakit")
 })
+
+app.use('/', authRouter)
+app.use('/', dashboardRouter)
 
 app.listen(3000, () => {
   console.log('Server is running on port 3000')
