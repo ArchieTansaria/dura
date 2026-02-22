@@ -63,8 +63,6 @@ export const callback = async (req: Request, res: Response) => {
   try {
     //1
     const { code, state } = req.query
-
-    console.log("Session:", req.session);
   
     //2 
     if (typeof state !== 'string' || state != req.session.oauthState){
@@ -211,7 +209,12 @@ export const installApp = async (req: Request, res: Response) => {
 }
 
 export const logout = (req: Request, res: Response) => {
-  req.session.destroy(() => {
-    res.redirect("/");
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).send("Logout failed");
+    }
+
+    res.clearCookie("connect.sid"); 
+    return res.redirect("/");
   });
 }
