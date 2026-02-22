@@ -7,11 +7,11 @@ import githubApp from '../config/github.js'
 
 export const login = (req: Request, res: Response) => {
   if (req.session.userId) {
-    return res.redirect("/dashboard");
+    return res.redirect("/api/dashboard");
   }
 
   req.session.oauthIntent = "login";
-  res.redirect("/auth/github");
+  return res.redirect("/auth/github");
 }
 
 export const connectToGithub = (req: Request, res: Response) => {
@@ -20,7 +20,7 @@ export const connectToGithub = (req: Request, res: Response) => {
     return res.redirect('/auth/github')
   }
   
-  res.redirect(`https://github.com/apps/${getEnv('APP_NAME')}/installations/new`)
+  return res.redirect(`https://github.com/apps/${getEnv('APP_NAME')}/installations/new`)
 }
 
 export const githubAuth = (req: Request, res: Response) => {
@@ -38,6 +38,7 @@ export const githubAuth = (req: Request, res: Response) => {
   //force session save before redirect so state persists
   req.session.save((err) => {
     if (err){
+      console.log(err)
       return res.status(500).send("Session save failed");
     }
     const queryParams = new URLSearchParams({
@@ -47,7 +48,7 @@ export const githubAuth = (req: Request, res: Response) => {
       state
     })
   
-    res.redirect(`https://github.com/login/oauth/authorize?${queryParams}`)
+    return res.redirect(`https://github.com/login/oauth/authorize?${queryParams}`)
   })
 }
 
@@ -126,7 +127,10 @@ export const callback = async (req: Request, res: Response) => {
       });
     }
 
-    //additional steps - storing to db + redirecting to install/dashboard
+    //additional steps - storing to db + redirecting to install or dashboard
+    
+    const intent = req.session.oauthIntent;
+    delete req.session.oauthIntent;
 
     //session regeneration - good practice
     req.session.regenerate((err) => {
@@ -142,32 +146,21 @@ export const callback = async (req: Request, res: Response) => {
           return res.status(500).send("Session save error");
         }
 
+        //user wanted to install
         if (intent === "install") {
           return res.redirect(
             `https://github.com/apps/${getEnv('APP_NAME')}/installations/new`
           );
         }
 
-        res.redirect("/dashboard");
+        //user only wanted to login, send to dashboard
+        return res.redirect("/api/dashboard");
       });
     });
   
-    const intent = req.session.oauthIntent;
-    delete req.session.oauthIntent;
-  
-    //user wanted to install
-    if (intent === "install") {
-      return res.redirect(
-        `https://github.com/apps/${getEnv('APP_NAME')}/installations/new`
-      );
-    }
-  
-    //user only wanted to login, send to dashboard
-    res.redirect("/dashboard");  
-  
   } catch (error) {
     console.error(error)
-    res.status(500).send("OAuth failed")
+    return res.status(500).send("OAuth failed")
   }
 }
 
@@ -209,11 +202,16 @@ export const installApp = async (req: Request, res: Response) => {
     );
 
     //redirect to dashboard
-    res.redirect("/dashboard");
+    return res.redirect("/api/dashboard");
     
   } catch (error) {
     console.error(error);
-    res.status(500).send("Installation setup failed");
+    return res.status(500).send("Installation setup failed");
   }
 }
 
+export const logout = (req: Request, res: Response) => {
+  req.session.destroy(() => {
+    res.redirect("/");
+  });
+}
