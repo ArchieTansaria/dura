@@ -1,4 +1,4 @@
-// this is the installation identity of the octokit client instance
+// this is the app identity of the octokit client instance
 
 import { App } from '@octokit/app'
 import { getEnv } from '../utils/envValidator.js'

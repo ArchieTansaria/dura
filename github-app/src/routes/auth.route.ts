@@ -8,7 +8,7 @@ export const router = express.Router()
 //user clicks login
 router.get("/login", authController.login);
 
-//user logs out
+//user logs out (clears cookies)
 router.get('/logout', authController.logout)
 
 //user clicks connect to gh
