@@ -1,6 +1,6 @@
 import { Queue } from 'bullmq'
 
-const prAnalysisQueue = new Queue('pr-dependency-analysis', {
+export const prAnalysisQueue = new Queue('pr-dependency-analysis', {
   connection : {
     host : "localhost",
     port : 6379 

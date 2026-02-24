@@ -8,8 +8,11 @@ import type { Express } from 'express'
 import { testQueue } from './queues/prAnalysisQueue.js'
 import { router as authRouter } from './routes/auth.route.js'
 import { router as dashboardRouter } from './routes/dashboard.route.js'
+import { router as webhookRouter } from './routes/webhook.route.js'
+import { registerWebhooks } from './webhooks/index.js'
 
 const app:Express = express()
+app.use(express.json())
 app.use(morgan('dev'))
 
 async function connectToDB(): Promise<void> {
@@ -24,6 +27,9 @@ async function connectToDB(): Promise<void> {
 connectToDB()
 testQueue()
 
+//register webhook handlers
+registerWebhooks()
+
 //using redis for session management
 app.use(sessionMiddleware);
 
@@ -33,6 +39,7 @@ app.get("/", (req, res) => {
 
 app.use('/', authRouter)
 app.use('/', dashboardRouter)
+app.use('/', webhookRouter)
 
 app.listen(3000, () => {
   console.log('Server is running on port 3000')
