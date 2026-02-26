@@ -5,8 +5,9 @@
 const { Command } = require("commander")
 const { execSync } = require("child_process")
 const { analyzeRepository } = require("../../core/index");
-const { formatTable } = require("../../core/utils/formatTable")
-const { formatSummary } = require("../../core/utils/formatSummary")
+const { formatTable } = require("../utils/formatTable")
+const { formatSummary } = require("../utils/formatSummary")
+const { aggregateRisk } = require("../../core/src/aggregate")
 const { helpInfo } = require("../../core/utils/helpInfo")
 const pkg = require("../package.json");
 const { setSilent } = require("../../core/utils/logger");
@@ -90,17 +91,17 @@ program
       if (options.json) {
         console.log(JSON.stringify(report, null, 2));
       } else {
+          const summaryData = aggregateRisk(report);
           if (options.debug || options.verbose) {
             console.log("\n" + formatTable(report) + "\n");
-            console.log("\n" + formatSummary(report) + "\n");
+            console.log("\n" + formatSummary(summaryData) + "\n");
           } else {
             if (options.table) {
               console.log("\n" + formatTable(report) + "\n");
-              // console.log("\n" + formatSummary(report) + "\n");
             } 
           }
           if (options.summary || (!options.verbose && !options.debug && !options.table)) {
-            console.log("\n" + formatSummary(report));
+            console.log("\n" + formatSummary(summaryData));
           }
       }
       if (spinner){

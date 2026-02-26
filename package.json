@@ -40,7 +40,6 @@
     "url": "https://github.com/ArchieTansaria/dura/issues"
   },
   "dependencies": {
-    "chalk": "^4.1.2",
     "crawlee": "^3.15.3",
     "node-fetch": "^3.3.2",
     "playwright": "^1.57.0",
