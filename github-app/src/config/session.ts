@@ -1,6 +1,6 @@
 import session from "express-session";
 import { RedisStore } from "connect-redis";
-import { redisClient } from "./redis.js";
+import { redisClient } from "./redisClient.js";
 import { getEnv } from "../utils/envValidator.js";
 
 export const sessionMiddleware = session({

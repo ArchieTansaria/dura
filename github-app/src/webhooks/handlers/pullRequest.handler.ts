@@ -14,6 +14,7 @@ export const handlePullRequestEvent = async ({ payload }: any) => {
     const prNumber = payload.pull_request.number
     const repo = payload.repository.full_name
     const prTitle = payload.pull_request.title
+    const branch = payload.pull_request.head.ref
   
     if (!installationId || !prNumber || !repo){
       console.log("Missing required PR data. Skipping.")
@@ -27,7 +28,7 @@ export const handlePullRequestEvent = async ({ payload }: any) => {
     //add job to queue
     await prAnalysisQueue.add(
       'analyze-pr',
-      { installationId, repo, prNumber, prTitle }, 
+      { installationId, repo, prNumber, prTitle, branch }, 
       { 
         attempts : 3, 
           backoff: {

@@ -9,10 +9,10 @@ import githubApp from '../config/github.js'
 */
 export const webhookHandler = async (req: Request, res: Response) => {  
   try {
-    const id = req.headers['x-github-delivery'] as string
-    const name = req.headers['x-github-event'] as string
-    const payload = req.body
-    const signature = req.headers['x-hub-signature-256'] as string
+    const id = req.headers["x-github-delivery"] as string
+    const name = req.headers["x-github-event"] as string
+    const payload = req.body.toString()
+    const signature = req.headers["x-hub-signature-256"] as string
     await githubApp.webhooks.verifyAndReceive({
       id,
       name, 
