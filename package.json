@@ -1,6 +1,6 @@
 {
   "name": "dura-kit",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Dependency Update Risk Analyzer",
   "main": "index.js",
   "types": "./core/index.d.ts",
