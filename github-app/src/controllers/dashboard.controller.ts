@@ -60,7 +60,7 @@ export const dashboard = async (req: Request, res: Response) => {
           }
           
         } catch (error) {
-          console.error("Invalid installation:", inst.installationId);
+          // console.error("Invalid installation:", inst.installationId);
           await Installation.updateOne(
             { installationId: inst.installationId },
             { suspended: true }

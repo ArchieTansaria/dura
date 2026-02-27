@@ -10,24 +10,23 @@ import { router as authRouter } from './routes/auth.route.js'
 import { router as dashboardRouter } from './routes/dashboard.route.js'
 import { router as webhookRouter } from './routes/webhook.route.js'
 import { registerWebhooks } from './webhooks/index.js'
-import { prAnalysisQueue } from './queues/prAnalysisQueue.js'
 
 const app:Express = express()
 
 //mounting the webhooks router before json parsing of body because it required raw body
 app.use('/', webhookRouter)
 
-//testing worker
-app.get("/test-job", async (req, res) => {
-  await prAnalysisQueue.add("analyze-pr", {
-    installationId: 123,
-    repo: "ArchieTansaria/test-repo",
-    prNumber: 1,
-    branch: "main",
-  });
+// //testing worker
+// app.get("/test-job", async (req, res) => {
+//   await prAnalysisQueue.add("analyze-pr", {
+//     installationId: 123,
+//     repo: "ArchieTansaria/test-repo",
+//     prNumber: 1,
+//     branch: "main",
+//   });
 
-  res.send("Job added");
-});
+//   res.send("Job added");
+// });
 
 app.use(express.json())
 app.use(morgan('dev'))
