@@ -3,6 +3,7 @@
   "version": "2.0.0",
   "description": "Dependency Update Risk Analyzer",
   "main": "index.js",
+  "types": "./core/index.d.ts",
   "type": "commonjs",
   "scripts": {
     "start": "node index.js",
