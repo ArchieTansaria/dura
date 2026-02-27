@@ -1,4 +1,5 @@
 import { getOrFetchAnalysis } from "../utils/helper.js";
+import { aggregateRisk } from "dura-kit";
 
 export async function handleBreakingChanges(args) {
   const { repoUrl, branch = "main" } = args;
@@ -7,10 +8,10 @@ export async function handleBreakingChanges(args) {
 
   const result = await getOrFetchAnalysis(repoUrl, branch);
   const dependencies = result.dependencies || result;
-  const breaking = dependencies.filter(
-    (d) =>
-      d.breakingChange?.breaking === "confirmed" ||
-      d.breakingChange?.breaking === "likely"
+  
+  const summary = aggregateRisk(dependencies);
+  const breaking = summary.prioritizedDependencies.filter(
+    (d) => d.breakingChange?.breaking === "confirmed" || d.breakingChange?.breaking === "likely"
   );
 
   if (breaking.length === 0) {
@@ -40,12 +41,14 @@ export async function handleBreakingChanges(args) {
     output += `\n`;
   });
 
-  output += `\n## Migration Planning\n\n`;
-  output += `These dependencies have confirmed breaking changes. Before updating:\n\n`;
-  output += `1. Read the migration guide for each dependency\n`;
-  output += `2. Identify affected code in your project\n`;
-  output += `3. Plan incremental updates\n`;
-  output += `4. Allocate time for testing and fixes\n`;
+  const immediateRecs = summary.recommendations.find(r => r.priority === 'immediate');
+  if (immediateRecs) {
+    output += `\n## Migration Planning\n\n`;
+    output += `These dependencies have confirmed breaking changes. Before updating:\n\n`;
+    immediateRecs.steps.forEach((step, index) => {
+      output += `${index + 1}. ${step}\n`;
+    });
+  }
 
   return {
     content: [

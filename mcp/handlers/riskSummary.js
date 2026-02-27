@@ -1,4 +1,5 @@
-import { getOrFetchAnalysis, calculateHealthScore } from "../utils/helper.js";
+import { getOrFetchAnalysis } from "../utils/helper.js";
+import { aggregateRisk } from "dura-kit";
 
 export async function handleRiskSummary(args) {
   const { repoUrl, branch = "main" } = args;
@@ -7,37 +8,31 @@ export async function handleRiskSummary(args) {
 
   const result = await getOrFetchAnalysis(repoUrl, branch);
   const dependencies = result.dependencies || result;
-
-  const high = dependencies.filter((d) => d.riskLevel === "high").length;
-  const medium = dependencies.filter((d) => d.riskLevel === "medium").length;
-  const low = dependencies.filter((d) => d.riskLevel === "low").length;
-  const breaking = dependencies.filter(
-    (d) => d.breakingChange?.breaking === "confirmed"
-  ).length;
+  
+  const summary = aggregateRisk(dependencies);
+  const { counts, health } = summary;
 
   let output = `# Dependency Health Summary\n\n`;
   output += `**Repository**: ${repoUrl}\n`;
   output += `**Branch**: ${branch}\n`;
-  output += `**Total Dependencies**: ${dependencies.length}\n\n`;
+  output += `**Total Dependencies**: ${summary.totalDependencies}\n\n`;
 
   output += `## Risk Distribution\n\n`;
-  output += `- High Risk: ${high}\n`;
-  output += `- Medium Risk: ${medium}\n`;
-  output += `- Low Risk: ${low}\n`;
-  if (breaking > 0) {
-    output += `- Breaking Changes: ${breaking}\n`;
+  output += `- High Risk: ${counts.high}\n`;
+  output += `- Medium Risk: ${counts.medium}\n`;
+  output += `- Low Risk: ${counts.low}\n`;
+  if (counts.breaking > 0) {
+    output += `- Breaking Changes: ${counts.breaking}\n`;
   }
   output += `\n`;
 
-  // Health score
-  const healthScore = calculateHealthScore(high, medium, low);
-  output += `## Health Score: ${healthScore}/100\n\n`;
+  output += `## Health Score: ${health.score}/100\n\n`;
 
-  if (healthScore >= 80) {
+  if (health.status === "excellent") {
     output += `**Excellent**: Dependencies are well-maintained and safe to update.\n`;
-  } else if (healthScore >= 60) {
+  } else if (health.status === "good") {
     output += `⚡ **Good**: Some updates needed but manageable risk.\n`;
-  } else if (healthScore >= 40) {
+  } else if (health.status === "needs-attention") {
     output += `**Needs Attention**: Multiple high-risk updates require planning.\n`;
   } else {
     output += `**Critical**: Significant dependency debt. Prioritize updates.\n`;

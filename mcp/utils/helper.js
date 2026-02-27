@@ -1,16 +1,10 @@
-import { analyzeRepository } from "dura-kit";
+import { analyzeRepository, aggregateRisk } from "dura-kit";
 import { cache, CACHE_TTL } from "./cache.js";
 
 // format full analysis (smart, actionable Output)
 export function formatFullAnalysis(result, fromCache) {
-  const dependencies = result.dependencies || result;
-
-  const high = dependencies.filter((d) => d.riskLevel === "high");
-  const medium = dependencies.filter((d) => d.riskLevel === "medium");
-  const low = dependencies.filter((d) => d.riskLevel === "low");
-  const breaking = dependencies.filter(
-    (d) => d.breakingChange?.breaking === "confirmed"
-  );
+  const summary = aggregateRisk(result);
+  const { counts, health, prioritizedDependencies, recommendations } = summary;
 
   let output = `# Dependency Risk Analysis\n\n`;
 
@@ -20,30 +14,26 @@ export function formatFullAnalysis(result, fromCache) {
 
   // Executive Summary
   output += `## Summary\n\n`;
-  output += `Analyzed **${dependencies.length}** dependencies:\n`;
-  output += `- **${high.length}** High Risk\n`;
-  output += `- **${medium.length}** Medium Risk\n`;
-  output += `- **${low.length}** Low Risk\n`;
-  if (breaking.length > 0) {
-    output += `- **${breaking.length}** with Breaking Changes\n`;
+  output += `Analyzed **${summary.totalDependencies}** dependencies:\n`;
+  output += `- **${counts.high}** High Risk\n`;
+  output += `- **${counts.medium}** Medium Risk\n`;
+  output += `- **${counts.low}** Low Risk\n`;
+  if (counts.breaking > 0) {
+    output += `- **${counts.breaking}** with Breaking Changes\n`;
   }
   output += `\n`;
 
   // Health Assessment
-  const healthScore = calculateHealthScore(high.length, medium.length, low.length);
-  output += `**Health Score**: ${healthScore}/100 - `;
-  if (healthScore >= 80) {
-    output += `Excellent\n\n`;
-  } else if (healthScore >= 60) {
-    output += `⚡ Good\n\n`;
-  } else if (healthScore >= 40) {
-    output += `Needs Attention\n\n`;
-  } else {
-    output += `Critical\n\n`;
-  }
+  output += `**Health Score**: ${health.score}/100 - `;
+  if (health.status === "excellent") output += `Excellent\n\n`;
+  else if (health.status === "good") output += `⚡ Good\n\n`;
+  else if (health.status === "needs-attention") output += `Needs Attention\n\n`;
+  else output += `Critical\n\n`;
 
   // Critical Issues (Breaking Changes + High Risk)
-  const criticalIssues = [...new Set([...breaking, ...high])]; // Deduplicate
+  const criticalIssues = prioritizedDependencies.filter(
+     d => d.riskLevel === "high" || (d.breakingChange && d.breakingChange.breaking === "confirmed")
+  );
   
   if (criticalIssues.length > 0) {
     output += `## Critical Issues Requiring Attention\n\n`;
@@ -79,16 +69,17 @@ export function formatFullAnalysis(result, fromCache) {
   }
 
   // Medium Risk (Brief)
+  const medium = prioritizedDependencies.filter(d => d.riskLevel === "medium");
   if (medium.length > 0 && criticalIssues.length === 0) {
     output += `## Medium Risk Dependencies\n\n`;
-    output += `${medium.length} dependencies have medium-risk updates. These should be reviewed but are not critical:\n\n`;
+    output += `${counts.medium} dependencies have medium-risk updates. These should be reviewed but are not critical:\n\n`;
     
     medium.slice(0, 5).forEach((dep) => {
       output += `- **${dep.name}**: \`${dep.currentResolved}\` → \`${dep.latest}\` (${dep.diff})\n`;
     });
     
-    if (medium.length > 5) {
-      output += `- ... and ${medium.length - 5} more\n`;
+    if (counts.medium > 5) {
+      output += `- ... and ${counts.medium - 5} more\n`;
     }
     output += `\n**Recommendation**: Review changelogs and update when convenient.\n\n`;
   }
@@ -100,85 +91,36 @@ export function formatFullAnalysis(result, fromCache) {
   }
 
   // recommendations
-  output += `## Recommendations\n\n`;
-  
-  if (breaking.length > 0) {
-    output += `### Immediate Actions (Breaking Changes)\n`;
-    output += `1. **Review migration guides** for ${breaking.length} ${breaking.length === 1 ? 'dependency' : 'dependencies'} with breaking changes\n`;
-    output += `2. **Create a feature branch** for dependency updates\n`;
-    output += `3. **Update one at a time** and test after each update\n`;
-    output += `4. **Allocate testing time** - breaking changes require thorough validation\n\n`;
-  }
-  
-  if (high.length > 0 && breaking.length === 0) {
-    output += `### High Priority Actions\n`;
-    output += `1. **Review changelogs** for ${high.length} high-risk ${high.length === 1 ? 'dependency' : 'dependencies'}\n`;
-    output += `2. **Test in staging** before production deployment\n`;
-    output += `3. **Update incrementally** to isolate potential issues\n\n`;
-  }
-  
-  if (medium.length > 0) {
-    output += `### Medium Priority Actions\n`;
-    output += `1. **Schedule updates** for ${medium.length} medium-risk dependencies in next sprint\n`;
-    output += `2. **Batch similar updates** together for efficiency\n`;
-    output += `3. **Run full test suite** after updating\n\n`;
-  }
-  
-  if (low.length > 0 && criticalIssues.length === 0 && medium.length === 0) {
-    output += `### Maintenance Actions\n`;
-    output += `1. **Safe to run** \`npm update\` or \`yarn upgrade\` for low-risk patches\n`;
-    output += `2. **Run automated tests** to verify compatibility\n`;
-    output += `3. **Commit changes** with clear description\n\n`;
-  }
-
-  // Update Priority Order
-  if (criticalIssues.length > 0 || medium.length > 0) {
-    output += `## Suggested Update Order\n\n`;
+  if (recommendations && recommendations.length > 0) {
+    output += `## Recommendations\n\n`;
     
-    let priority = 1;
-    
-    if (breaking.length > 0) {
-      output += `**Priority ${priority}**: Breaking Changes\n`;
-      breaking.slice(0, 3).forEach(dep => {
-        output += `- ${dep.name}\n`;
+    recommendations.forEach(rec => {
+      output += `### ${rec.title}\n`;
+      rec.steps.forEach((step, index) => {
+         output += `${index + 1}. **${step.split(' ').slice(0, 3).join(' ')}** ${step.split(' ').slice(3).join(' ')}\n`;
       });
       output += `\n`;
-      priority++;
-    }
-    
-    if (high.length > 0 && breaking.length === 0) {
-      output += `**Priority ${priority}**: High Risk Dependencies\n`;
-      high.slice(0, 3).forEach(dep => {
-        output += `- ${dep.name}\n`;
-      });
-      output += `\n`;
-      priority++;
-    }
-    
-    if (medium.length > 0) {
-      output += `**Priority ${priority}**: Medium Risk Dependencies\n`;
-      output += `- Update in batches during regular maintenance\n\n`;
-    }
+    });
   }
 
   // Technical Details (Collapsed)
   output += `\n---\n\n`;
-  output += `<details>\n<summary>View All Dependencies (${dependencies.length})</summary>\n\n`;
+  output += `<details>\n<summary>View All Dependencies (${summary.totalDependencies})</summary>\n\n`;
   
-  if (high.length > 0) {
-    output += `### High Risk (${high.length})\n`;
-    high.forEach(d => output += `- ${d.name}: ${d.currentResolved} → ${d.latest}\n`);
+  if (counts.high > 0) {
+    output += `### High Risk (${counts.high})\n`;
+    prioritizedDependencies.filter(d => d.riskLevel === "high").forEach(d => output += `- ${d.name}: ${d.currentResolved} → ${d.latest}\n`);
     output += `\n`;
   }
   
-  if (medium.length > 0) {
-    output += `### Medium Risk (${medium.length})\n`;
+  if (counts.medium > 0) {
+    output += `### Medium Risk (${counts.medium})\n`;
     medium.forEach(d => output += `- ${d.name}: ${d.currentResolved} → ${d.latest}\n`);
     output += `\n`;
   }
   
-  if (low.length > 0) {
-    output += `### Low Risk (${low.length})\n`;
+  if (counts.low > 0) {
+    output += `### Low Risk (${counts.low})\n`;
     output += `All up-to-date or safe patch updates.\n\n`;
   }
   
@@ -222,15 +164,6 @@ export function setCachedResult(repoUrl, branch, data) {
     data,
     timestamp: Date.now(),
   });
-}
-
-// calculate health score
-export function calculateHealthScore(high, medium, low) {
-  const total = high + medium + low;
-  if (total === 0) return 100;
-
-  const score = ((low + medium * 0.5) / total) * 100;
-  return Math.round(score);
 }
 
 // Error handling

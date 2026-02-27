@@ -1,4 +1,5 @@
 import { getOrFetchAnalysis } from "../utils/helper.js";
+import { aggregateRisk } from "dura-kit";
 
 export async function handleHighRiskFilter(args) {
   const { repoUrl, branch = "main" } = args;
@@ -7,7 +8,10 @@ export async function handleHighRiskFilter(args) {
 
   const result = await getOrFetchAnalysis(repoUrl, branch);
   const dependencies = result.dependencies || result;
-  const highRisk = dependencies.filter((d) => d.riskLevel === "high");
+  
+  const summary = aggregateRisk(dependencies);
+  
+  const highRisk = summary.prioritizedDependencies.filter((d) => d.riskLevel === "high");
 
   if (highRisk.length === 0) {
     return {
@@ -39,17 +43,13 @@ export async function handleHighRiskFilter(args) {
     output += `\n`;
   });
 
-  output += `\n## Recommendations\n\n`;
-  if (highRisk.length > 1){
-    output += `1. Review migration guides for each dependency\n`;
-    output += `2. Test updates in a staging environment\n`;
-    output += `3. Update one dependency at a time\n`;
-    output += `4. Check for related dependencies that may also need updates\n`;
-  } else {
-    output += `1. Review migration guides for this dependency\n`;
-    output += `2. Test updates in a staging environment\n`;
+  const highRecs = summary.recommendations.find(r => r.priority === 'high');
+  if (highRecs) {
+    output += `\n## Recommendations\n\n`;
+    highRecs.steps.forEach((step, index) => {
+      output += `${index + 1}. ${step}\n`;
+    });
   }
-
 
   return {
     content: [
