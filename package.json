@@ -21,6 +21,7 @@
     "/core/src",
     "/core/utils",
     "/core/index.js",
+    "/core/index.d.ts",
     "index.js",
     "LICENSE"
   ],
