@@ -14,6 +14,7 @@
   },
   "files": [
     "/cli/bin",
+    "/cli/utils",
     "/cli/package.json",
     "/cli/package-lock.json",
     "/core/src",
