@@ -2,6 +2,7 @@ import { Worker, Job } from "bullmq";
 import { redisConnection } from "../config/redisConnection.js";
 import githubApp from '../config/github.js'
 import { analyzeRepository } from 'dura-kit'
+import { formatPRComment } from '../utils/formatters.js'
 
 const prAnalysisWorker = new Worker('prAnalysisQueue', async (job: Job) => {
   try {
@@ -29,8 +30,7 @@ const prAnalysisWorker = new Worker('prAnalysisQueue', async (job: Job) => {
       owner,
       repo: repoName,
       issue_number: prNumber,
-      // body: formatComment(result),
-      body: "test comment"
+      body: formatPRComment(result)
     })
 
     console.log(`Finished PR #${prNumber}`)
@@ -44,3 +44,4 @@ const prAnalysisWorker = new Worker('prAnalysisQueue', async (job: Job) => {
   connection: redisConnection,
   concurrency: 2
 })
+
