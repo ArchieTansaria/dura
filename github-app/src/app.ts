@@ -10,11 +10,14 @@ import { router as authRouter } from './routes/auth.route.js'
 import { router as dashboardRouter } from './routes/dashboard.route.js'
 import { router as webhookRouter } from './routes/webhook.route.js'
 import { registerWebhooks } from './webhooks/index.js'
+import { corsMiddleware } from './config/cors.js'
 
 const app:Express = express()
 
 //mounting the webhooks router before json parsing of body because it required raw body
 app.use('/', webhookRouter)
+
+app.use(corsMiddleware())
 
 // //testing worker
 // app.get("/test-job", async (req, res) => {

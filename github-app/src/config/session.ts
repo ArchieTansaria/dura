@@ -13,7 +13,8 @@ export const sessionMiddleware = session({
   saveUninitialized: false,
   cookie: {
     secure: false,
-    sameSite: "lax",
+    // sameSite: "lax",
+    sameSite: "none", // for prod
     maxAge: 24 * 60 * 60 * 1000,
   },
 });
