@@ -7,7 +7,7 @@
     "dev:worker": "tsx watch --env-file=.env src/workers/pr.worker.ts",
     "build": "npx tsc",
     "start": "node dist/app.js",
-    "start:worker": "node dist/workers/prWorker.js"
+    "start:worker": "node dist/workers/pr.worker.js"
   },
   "type": "module",
   "keywords": [],
