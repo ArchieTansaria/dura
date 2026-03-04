@@ -12,13 +12,27 @@ export function Logo({ className }) {
       className={cn("w-6 h-6", className)}
     >
       <path
-        d="M26 12C26 8.68629 23.3137 6 20 6H13C11.8954 6 11 6.89543 11 8V11H8C6.34315 11 5 12.3431 5 14V17C5 18.1046 5.89543 19 7 19H8V24H12V26H21V22.25C23.8348 20.9168 26 18.4239 26 15V12Z"
+        d="M 3 19 
+           C 5 24, 10 15, 15 15 
+           C 18 15, 19 12, 19 7 
+           C 19 3, 22 2, 25 2 
+           C 29 2, 29 7, 26 7 
+           C 24 7, 23 9, 23 15 
+           C 23 19, 21 21, 21 25 
+           L 21 30 
+           L 18 30 
+           L 18 25.5 
+           C 17 26.5, 15 26.5, 14 25.5 
+           L 14 30 
+           L 11 30 
+           L 11 25 
+           C 8 28, 4 27, 2 21 
+           C 1 18, 3 18, 3 19 Z"
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx="19" cy="11" r="1.5" fill="currentColor" />
     </svg>
   );
 }

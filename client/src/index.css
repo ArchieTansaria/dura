@@ -7,3 +7,29 @@
 		@apply bg-background text-primary antialiased;
 	}
 }
+
+@layer utilities {
+	.animate-cell-ripple {
+		animation: cell-ripple var(--duration, 200ms) ease-out none 1 var(--delay, 0ms);
+	}
+}
+
+@keyframes cell-ripple {
+	0% {
+		opacity: 0.2;
+		border-color: rgba(103, 98, 100, 0.8);
+		background-color: rgba(52, 50, 51, 0.1)
+	}
+
+	50% {
+		opacity: 0.6;
+		border-color: rgba(103, 98, 100, 0.8);
+		background-color: rgba(52, 50, 51, 0.1)
+	}
+
+	100% {
+		opacity: 0.2;
+		border-color: rgba(103, 98, 100, 0.8);
+		background-color: rgba(52, 50, 51, 0.1)
+	}
+}

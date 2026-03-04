@@ -63,7 +63,7 @@ export function InteractiveSelector() {
       {/* Header / Tabs */}
       <div className="flex items-center border-b border-white/5 bg-black/20 overflow-x-auto no-scrollbar">
         <div className="px-5 py-4 text-secondary text-sm font-medium whitespace-nowrap">
-          Use dura via:
+          Use dura with
         </div>
         {OPTIONS.map((option) => {
           const Icon = option.icon;
