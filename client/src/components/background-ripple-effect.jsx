@@ -3,9 +3,9 @@ import React, { useMemo, useRef, useState } from "react";
 import { cn } from "../utils/utils";
 
 export const BackgroundRippleEffect = ({
-  rows = 14,
-  cols = 25,
-  cellSize = 60
+  rows = 16,
+  cols = 30,
+  cellSize = 62
 }) => {
   const [clickedCell, setClickedCell] = useState(null);
   const [rippleKey, setRippleKey] = useState(0);
@@ -20,8 +20,8 @@ export const BackgroundRippleEffect = ({
         "dark:[--cell-border-color:var(--color-neutral-700)] dark:[--cell-fill-color:var(--color-neutral-900)] dark:[--cell-shadow-color:var(--color-neutral-800)]"
       )}
       style={{
-        WebkitMaskImage: "radial-gradient(1400px 1100px at top, black 60%, transparent 80%)",
-        maskImage: "radial-gradient(1400px 1100px at top, black 60%, transparent 80%)",
+        WebkitMaskImage: "linear-gradient(to bottom, white 0%, white 60%, transparent 100%)",
+        maskImage: "linear-gradient(to bottom, white 0%, white 60%, transparent 100%)",
       }}
     >
       <div className="relative h-auto w-auto overflow-hidden">
