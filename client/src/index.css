@@ -12,6 +12,37 @@
 	.animate-cell-ripple {
 		animation: cell-ripple var(--duration, 200ms) ease-out none 1 var(--delay, 0ms);
 	}
+
+  .highlight-word {
+    position: relative;
+    display: inline-block;
+    z-index: 10;
+    transition: transform 0.35s ease;
+    cursor: default;
+  }
+  
+  .highlight-word:hover {
+    transform: translateY(-1px);
+  }
+  
+  .highlight-word::before {
+    content: "";
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    left: -10px;
+    right: -10px;
+    background-color: rgba(251, 191, 36, 0.85); /* amber-400 */
+    border-radius: 8px;
+    z-index: -1;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s ease;
+  }
+  
+  .highlight-word:hover::before {
+    transform: scaleX(1);
+  }
 }
 
 @keyframes cell-ripple {

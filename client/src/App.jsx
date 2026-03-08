@@ -17,11 +17,17 @@ function App() {
         <Hero />
         <section className="w-full relative z-20">
           {/* Seamless blend gradient */}
-          <div className="absolute top-[-7rem] inset-x-0 bottom-0 bg-gradient-to-b from-transparent via-[#050505] via-[8rem] to-[#050505] border-b border-white/[0.08]" />
+          <div className="absolute top-[-6rem] inset-0 bottom-0 bg-gradient-to-b from-transparent via-[#050505] via-[8rem] to-[#050505]" />
           
           <div className="relative z-10 w-full">
-            <FeatureCards />
             <RiskAnalysisDemo />
+          </div>
+        </section>
+
+        <section className="w-full relative z-20 bg-black/60 border-t border-white/10">
+          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
+          <div className="relative z-10 w-full pt-28">
+            <FeatureCards />
           </div>
         </section>
         <ExecutionSurfaces />

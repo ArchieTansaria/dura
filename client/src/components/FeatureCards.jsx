@@ -8,52 +8,28 @@ import { cn } from '../utils/utils';
 export function FeatureCards() {
   return (
     <div className="w-full relative z-20">
-      <div className="relative z-10 pt-20 pb-20 px-4 w-full max-w-7xl mx-auto -mt-2">
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-center mb-20"
-        >
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-primary mb-4">
-            Ship fast. Break <span className='text-accent'>nothing.</span>
+      <div className="relative z-10 pb-32 px-4 w-full max-w-7xl mx-auto">
+        <div className="text-center mb-20">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-primary mb-4">
+            Dependency updates. Without the <span className="highlight-word">guesswork</span>.
           </h2>
           <p className="text-secondary text-lg max-w-2xl mx-auto font-light">
             Stop guessing and manually handling dependency updates.
           </p>
-        </motion.div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start relative pb-4">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
-            className="w-full"
-          >
+          <div className="w-full">
             <ScannerCard />
-          </motion.div>
+          </div>
           
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
-            className="w-full"
-          >
+          <div className="w-full">
             <BreakingChangesCard />
-          </motion.div>
+          </div>
           
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.7, delay: 0.5, ease: "easeOut" }}
-            className="w-full"
-          >
+          <div className="w-full">
             <AutomateCard />
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>
@@ -94,17 +70,17 @@ function CardBase({ number, title, description, children, className }) {
   const rotateX = useTransform(normY, [-1, 1], [4, -4]);
   const rotateY = useTransform(normX, [-1, 1], [-4, 4]);
 
-  const xLayer1 = useTransform(normX, [-1, 1], [-3, 3]);
-  const yLayer1 = useTransform(normY, [-1, 1], [-3, 3]);
+  const xLayer1 = useTransform(normX, [-1, 1], [-1, 1]);
+  const yLayer1 = useTransform(normY, [-1, 1], [-1, 1]);
 
-  const xLayer2 = useTransform(normX, [-1, 1], [-8, 8]);
-  const yLayer2 = useTransform(normY, [-1, 1], [-8, 8]);
+  const xLayer2 = useTransform(normX, [-1, 1], [-2, 2]);
+  const yLayer2 = useTransform(normY, [-1, 1], [-2, 2]);
 
-  const xLayer3 = useTransform(normX, [-1, 1], [-14, 14]);
-  const yLayer3 = useTransform(normY, [-1, 1], [-14, 14]);
+  const xLayer3 = useTransform(normX, [-1, 1], [-4, 4]);
+  const yLayer3 = useTransform(normY, [-1, 1], [-4, 4]);
 
   return (
-    <div ref={cardRef} style={{ perspective: "1000px" }} className={cn("relative h-[480px] w-full", className)}>
+    <div ref={cardRef} style={{ perspective: "1000px" }} className={cn("relative h-[430px] w-full", className)}>
       <motion.div 
         whileHover={{ y: -5 }}
         style={{ rotateX, rotateY }}
@@ -122,32 +98,32 @@ function CardBase({ number, title, description, children, className }) {
           style={{
             background: useMotionTemplate`
               radial-gradient(
-                400px circle at ${springLocalX}px ${springLocalY}px,
-                rgba(255, 255, 255, 0.08),
+                250px circle at ${springLocalX}px ${springLocalY}px,
+                rgba(255, 255, 255, 0.03),
                 transparent 80%
               )
             `,
           }}
         />
         
-        <div className="p-6 md:p-8 flex flex-col grow h-full relative z-10">
-          <motion.div style={{ x: xLayer1, y: yLayer1 }} className="text-amber-500 font-mono text-sm font-bold mb-4 tracking-wider opacity-90 w-fit">
+        <div className="p-5 md:p-6 flex flex-col grow h-full relative z-10">
+          <motion.div style={{ x: xLayer1, y: yLayer1 }} className="text-amber-500 font-mono text-xs md:text-sm font-bold mb-3 tracking-wider opacity-90 w-fit">
              {number}
           </motion.div>
           
           <motion.div style={{ x: xLayer2, y: yLayer2 }}>
-            <h3 className="text-primary text-xl font-medium mb-3 flex items-center w-fit">
+            <h3 className="text-primary text-lg font-medium mb-2 flex items-center w-fit">
                {title}  
-               <ArrowRight className="w-5 h-5 ml-1 transition-all duration-300 ease-out opacity-0 -translate-x-3 group-hover:translate-x-1 group-hover:opacity-100 group-hover:text-amber-500" />
+               <ArrowRight className="w-4 h-4 ml-1 transition-all duration-300 ease-out opacity-0 -translate-x-3 group-hover:translate-x-1 group-hover:opacity-100 group-hover:text-amber-500" />
             </h3>
-            <p className="text-secondary/70 text-base leading-relaxed mb-8 max-w-[95%]">
+            <p className="text-secondary/70 text-xs md:text-sm leading-relaxed mb-4 max-w-[95%]">
               {description}
             </p>
           </motion.div>
 
           <motion.div 
             style={{ x: xLayer3, y: yLayer3 }}
-            className="mt-auto relative rounded-xl border border-white/5 bg-[#0a0a0a] shadow-[0_8px_30px_rgb(0,0,0,0.4)] h-[220px] shrink-0 overflow-hidden flex flex-col items-center"
+            className="mt-auto relative rounded-xl border border-white/5 bg-[#0a0a0a] shadow-[0_8px_30px_rgb(0,0,0,0.4)] h-[230px] shrink-0 overflow-hidden flex flex-col items-center"
           >
             <div className="relative z-10 h-full w-full">
               {children}
@@ -270,7 +246,7 @@ function BreakingChangesCard() {
       title="Analyze breaking changes" 
       description="Deep analysis identifies API changes, deprecations, and migration risks." 
     >
-      <div className="h-full w-full flex items-start justify-center pt-8">
+      <div className="h-full w-full flex items-start justify-center pt-5">
         
         <motion.div 
           layout
