@@ -8,10 +8,11 @@ import { cn } from '../utils/utils';
 export function FeatureCards() {
   return (
     <div className="w-full relative z-20">
-      <div className="relative z-10 pb-32 px-4 w-full max-w-7xl mx-auto">
+      <div className="relative z-10 px-4 w-full max-w-7xl mx-auto">
         <div className="text-center mb-20">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-primary mb-4">
-            Dependency updates. Without the <span className="highlight-word">guesswork</span>.
+          <h2 className="text-sm font-mono text-amber-500 uppercase tracking-[0.2em] mb-4">HOW DURA WORKS</h2>
+          <h2 className="text-3xl md:text-3xl font-bold tracking-tight text-primary mb-4">
+            Semantic Analysis meets deep graph <span className="highlight-word">traversal</span>.
           </h2>
           <p className="text-secondary text-lg max-w-2xl mx-auto font-light">
             Stop guessing and manually handling dependency updates.

@@ -9,6 +9,7 @@ const cn = (...inputs) => twMerge(clsx(inputs));
 const NAV_LINKS = [
   { label: 'Features', href: '#features' },
   { label: 'Docs', href: '#' },
+  { label: 'Dashboard', href: '#' },
   { label: 'Contact', href: '#' },
 ];
 
@@ -39,7 +40,7 @@ export function Navbar() {
         </a>
 
         {/* Center: Links - absolutely positioned for true centering */}
-        <div className="hidden md:flex items-center pr-2 gap-0.5 absolute left-1/2 -translate-x-1/2">
+        <div className="hidden md:flex items-center gap-0.5 absolute left-1/2 -translate-x-1/2">
           {NAV_LINKS.map((link) => (
             <a
               key={link.label}
@@ -55,7 +56,7 @@ export function Navbar() {
         <div className="flex items-center gap-2">
           <a
             href="#"
-            className="text-[13px] text-secondary hover:text-primary transition-colors font-medium px-3 py-1.5"
+            className="text-[13px] text-secondary hover:text-primary transition-colors font-medium rounded-md hover:bg-white/5 px-3 py-1.5"
           >
             Login
           </a>

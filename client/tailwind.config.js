@@ -17,7 +17,8 @@ export default {
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
         mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
-        display: ['"Playfair Display"', 'sans-serif']
+        display: ['Playfair Display', 'sans-serif'],
+        bitcount: ['Bitcount Prop Double', 'sans-serif']
       }
     },
   },

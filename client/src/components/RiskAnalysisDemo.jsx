@@ -84,9 +84,12 @@ export function RiskAnalysisDemo() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
         {/* Left Side: Copy & Checklist */}
         <div className="lg:col-span-5 flex flex-col">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-primary mb-6">
+          <div className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-amber-500/80 text-black text-[10px] font-bold tracking-wider mb-6 w-fit uppercase">
+            Analysis
+          </div>
+          <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-primary mb-6">
             Not just version diffs. <br className="hidden lg:block mt-2" />
-            <span className="text-primary"><span className="font-display italic">Real</span> breaking change <span className="font-display italic ">detection.</span></span>
+            <span className="text-primary"><span className="font-display italic">Real</span> breaking change <span className="font-display italic"><br></br>detection.</span></span>
           </h2>
           <p className="text-secondary text-lg mb-8 leading-relaxed font-light">
             Dura analyzes release notes, changelogs, and dependency graphs to
@@ -122,7 +125,7 @@ export function RiskAnalysisDemo() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-          className="lg:col-span-7 relative group/demoui mt-10 rounded-xl border border-white/10 bg-[#0a0a0a]/80 backdrop-blur-md overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.6)] hover:shadow-[0_0_40px_rgba(245,158,11,0.12)] hover:border-white/[0.15] transition-all duration-500 w-full"
+          className="lg:col-span-7 relative group/demoui mt-16 rounded-xl border border-white/10 bg-[#0a0a0a]/80 backdrop-blur-md overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.6)] hover:shadow-[0_0_40px_rgba(245,158,11,0.12)] hover:border-white/[0.15] transition-all duration-500 w-full"
         >
           {/* Top inset glassy glare line */}
           <div/>

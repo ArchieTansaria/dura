@@ -2,7 +2,6 @@ import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { RiskAnalysisDemo } from './components/RiskAnalysisDemo';
 import { ExecutionSurfaces } from './components/ExecutionSurfaces';
-import { HowItWorks } from './components/HowItWorks';
 import { Philosophy } from './components/Philosophy';
 import { Footer } from './components/Footer';
 import { BackgroundRippleEffect } from './components/background-ripple-effect';
@@ -24,14 +23,13 @@ function App() {
           </div>
         </section>
 
-        <section className="w-full relative z-20 bg-black/60 border-t border-white/10">
+        <section className="w-full relative z-20 bg-[#0000004d] border-t border-white/[0.08]">
           <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
           <div className="relative z-10 w-full pt-28">
             <FeatureCards />
           </div>
         </section>
         <ExecutionSurfaces />
-        <HowItWorks />
         <Philosophy />
       </main>
       <Footer />
