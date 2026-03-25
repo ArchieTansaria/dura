@@ -14,6 +14,9 @@ import { corsMiddleware } from './config/cors.js'
 
 const app:Express = express()
 
+// Trust the proxy (Railway) to allow secure cookies
+app.set("trust proxy", 1);
+
 //mounting the webhooks router before json parsing of body because it required raw body
 app.use('/', webhookRouter)
 

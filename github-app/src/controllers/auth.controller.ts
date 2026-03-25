@@ -63,6 +63,9 @@ export const callback = async (req: Request, res: Response) => {
   try {
     //1
     const { code, state } = req.query
+
+    console.log("SESSION STATE:", req.session.oauthState);
+    console.log("QUERY STATE:", state);
   
     //2 
     if (typeof state !== 'string' || state != req.session.oauthState){
@@ -217,4 +220,20 @@ export const logout = (req: Request, res: Response) => {
     res.clearCookie("connect.sid"); 
     return res.redirect("/");
   });
+}
+
+export const getMe = async (req: Request, res: Response) => {
+  try {
+    if (!req.session.userId) {
+      return res.status(401).json({ user: null });
+    }
+    const user = await User.findById(req.session.userId).select('-accessToken');
+    if (!user) {
+      return res.status(401).json({ user: null });
+    }
+    return res.json({ user });
+  } catch (error) {
+    console.error("Error in getMe:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
 }

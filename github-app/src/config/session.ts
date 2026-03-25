@@ -12,9 +12,8 @@ export const sessionMiddleware = session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false,
-    // sameSite: "lax",
-    sameSite: "none", // for prod
+    secure: process.env.NODE_ENV === "production", //true in prod, false in dev
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     maxAge: 24 * 60 * 60 * 1000,
   },
 });

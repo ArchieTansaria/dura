@@ -22,3 +22,6 @@ router.get('/auth/callback', authController.callback)
 
 //user installs dura app
 router.get('/auth/install', authController.installApp)
+
+//get current authenticated user (frontend checks this)
+router.get('/me', authController.getMe)
