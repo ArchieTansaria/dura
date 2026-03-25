@@ -1,9 +1,9 @@
 import { Queue } from 'bullmq'
+import { getEnv } from '../utils/envValidator.js'
 
 export const prAnalysisQueue = new Queue('prAnalysisQueue', {
   connection : {
-    host : "localhost",
-    port : 6379 
+    url: getEnv("REDIS_URL")
   }
 })
 
