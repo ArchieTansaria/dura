@@ -3,6 +3,7 @@ import { Hero } from './components/Hero';
 import { RiskAnalysisDemo } from './components/RiskAnalysisDemo';
 import { ExecutionSurfaces } from './components/ExecutionSurfaces';
 import { Philosophy } from './components/Philosophy';
+import { CtaSection } from './components/CtaSection';
 import { Footer } from './components/Footer';
 import { BackgroundRippleEffect } from './components/background-ripple-effect';
 import { FeatureCards } from './components/FeatureCards';
@@ -30,6 +31,7 @@ function App() {
           </div>
         </section>
         <ExecutionSurfaces />
+        <CtaSection />
         <Philosophy />
       </main>
       <Footer />

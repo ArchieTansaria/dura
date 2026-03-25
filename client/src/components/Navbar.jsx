@@ -3,6 +3,7 @@ import { Github } from 'lucide-react';
 import { Logo } from './Logo';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { useAuth } from '../contexts/AuthContext';
 
 const cn = (...inputs) => twMerge(clsx(inputs));
 
@@ -15,6 +16,7 @@ const NAV_LINKS = [
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -54,19 +56,35 @@ export function Navbar() {
 
         {/* Right: Login + Connect GitHub */}
         <div className="flex items-center gap-2">
-          <a
-            href="#"
-            className="text-[13px] text-secondary hover:text-primary transition-colors font-medium rounded-md hover:bg-white/5 px-3 py-1.5"
-          >
-            Login
-          </a>
-          <a
-            href="https://github.com/apps/dura-dep"
-            className="flex items-center gap-2 bg-white/10 hover:bg-white/15 text-primary text-[13px] font-medium px-3 py-1.5 rounded-full transition-all border border-white/5 hover:border-white/10"
-          >
-            <Github size={14} />
-            <span>Connect GitHub</span>
-          </a>
+          {loading ? null : user ? (
+            <div className="flex items-center gap-4">
+              <span className="text-[13px] text-secondary hidden sm:block">
+                {user.githubLogin}
+              </span>
+              <a
+                href={`${import.meta.env.VITE_BACKEND_URL}/logout`}
+                className="text-[13px] text-secondary hover:text-primary transition-colors font-medium rounded-md hover:bg-white/5 px-3 py-1.5"
+              >
+                Logout
+              </a>
+            </div>
+          ) : (
+            <>
+              <a
+                href={`${import.meta.env.VITE_BACKEND_URL}/login`}
+                className="text-[13px] text-secondary hover:text-primary transition-colors font-medium rounded-md hover:bg-white/5 px-3 py-1.5"
+              >
+                Login
+              </a>
+              <a
+                href={`${import.meta.env.VITE_BACKEND_URL}/auth/connect`}
+                className="flex items-center gap-2 bg-white/10 hover:bg-white/15 text-primary text-[13px] font-medium px-3 py-1.5 rounded-full transition-all border border-white/5 hover:border-white/10"
+              >
+                <Github size={14} />
+                <span>Connect GitHub</span>
+              </a>
+            </>
+          )}
         </div>
       </nav>
     </div>
