@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Github } from 'lucide-react';
 import { Logo } from './Logo';
 import { clsx } from 'clsx';
@@ -70,12 +71,12 @@ export function Navbar() {
             </div>
           ) : (
             <>
-              <a
-                href={`${import.meta.env.VITE_BACKEND_URL}/login`}
+              <Link
+                to="/auth"
                 className="text-[13px] text-secondary hover:text-primary transition-colors font-medium rounded-md hover:bg-white/5 px-3 py-1.5"
               >
                 Login
-              </a>
+              </Link>
               <a
                 href={`${import.meta.env.VITE_BACKEND_URL}/auth/connect`}
                 className="flex items-center gap-2 bg-white/10 hover:bg-white/15 text-primary text-[13px] font-medium px-3 py-1.5 rounded-full transition-all border border-white/5 hover:border-white/10"
