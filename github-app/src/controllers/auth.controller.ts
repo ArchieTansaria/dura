@@ -214,11 +214,12 @@ export const installApp = async (req: Request, res: Response) => {
 export const logout = (req: Request, res: Response) => {
   req.session.destroy((err) => {
     if (err) {
+      console.error("Session destruction error:", err);
       return res.status(500).send("Logout failed");
     }
 
     res.clearCookie("connect.sid"); 
-    return res.redirect("/");
+    return res.redirect(getEnv('FRONTEND_URL'));
   });
 }
 
