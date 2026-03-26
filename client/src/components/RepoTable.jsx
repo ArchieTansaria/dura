@@ -20,14 +20,10 @@ export function RepoTable({ repos = [] }) {
             <tr key={repo.id} className="group hover:bg-white/[0.02] transition-colors duration-300">
               <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
-                  {repo.avatar_url ? (
-                    <img src={repo.avatar_url} alt={repo.full_name || repo.name} className="w-8 h-8 rounded-lg bg-white/5 border border-white/5 object-cover shrink-0" />
-                  ) : (
-                    <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center shrink-0">
-                      <Github className="w-4 h-4 text-white/70" />
-                    </div>
-                  )}
-                  <span className="font-medium text-white/90 group-hover:text-white transition-colors">{repo.full_name || repo.name}</span>
+                  <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center shrink-0">
+                    <Github className="w-4 h-4 text-white/70" />
+                  </div>
+                  <span className="font-medium text-white/90 group-hover:text-white transition-colors">{repo.name}</span>
                 </div>
               </td>
               <td className="px-6 py-4">

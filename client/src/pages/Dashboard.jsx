@@ -44,7 +44,7 @@ export default function Dashboard() {
   }, []);
 
   const filteredRepos = repos.filter(repo => 
-    (repo.full_name || repo.name).toLowerCase().includes(searchQuery.toLowerCase())
+    repo.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
