@@ -119,12 +119,14 @@ export const callback = async (req: Request, res: Response) => {
     let dbUser = await User.findOne({ githubId: user.id })
     if (dbUser){
       dbUser.accessToken = accessToken;
+      dbUser.avatarUrl = user.avatar_url;
       await dbUser.save();
     } else {
       dbUser = await User.create({
         githubId: user.id,
         githubLogin: user.login,
         accessToken: accessToken,
+        avatarUrl: user.avatar_url,
       });
     }
 
