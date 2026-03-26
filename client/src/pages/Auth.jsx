@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { Github } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Github, ChevronLeft } from 'lucide-react';
 import { cn } from '../utils/utils';
+import { Logo } from '../components/Logo';
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -11,94 +13,106 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col md:flex-row text-white font-sans selection:bg-amber-500/30">
+    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4 sm:p-8 relative selection:bg-amber-500/30">
       
-      {/* LEFT SIDE - Branding */}
-      <div className="relative hidden md:flex flex-1 flex-col justify-center px-12 lg:px-24 overflow-hidden border-r border-white/5 bg-black/20">
-        
-        {/* Abstract Background Effects */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-500/10 blur-[120px] rounded-full mix-blend-screen transition-opacity duration-1000" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-white/5 blur-[100px] rounded-full mix-blend-overlay" />
-          
-          {/* Subtle Grid Pattern */}
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTAgMGg0MHY0MEgwVjB6bTM5IDM5VjFoLTM4djM4aDM4eiIgZmlsbD0icmdiYSgyNTUsIDI1NSwgMjU1LCAwLjAxKSIgZmlsbC1ydWxlPSJldmVub2RkIi8+PC9zdmc+')] mix-blend-overlay opacity-30" />
-        </div>
-
-        {/* Content */}
-        <div className="relative z-10 max-w-xl">
-          <div className="inline-block px-3 py-1 mb-8 rounded-full border border-white/10 bg-white/5 backdrop-blur-md">
-            <span className="font-mono text-xs font-medium tracking-wider text-amber-500/90 uppercase">
-              dura authentication
-            </span>
-          </div>
-          
-          <h1 className="text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] mb-6 drop-shadow-sm">
-            You're one click away from <span className="text-white/80 italic">better code.</span>
-          </h1>
-          
-          <p className="text-lg text-white/50 leading-relaxed font-light max-w-lg">
-            Connect your GitHub and start shipping with confidence.
-          </p>
-        </div>
+      {/* Background ambient glow for the whole page */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-amber-500/5 blur-[120px] rounded-full" />
       </div>
 
-      {/* RIGHT SIDE - Auth Card */}
-      <div className="flex-1 flex items-center justify-center p-6 md:p-12 relative bg-black/10">
+      <div className="flex flex-col md:flex-row w-full max-w-[1000px] min-h-[600px] bg-[#0c0c0c] rounded-2xl overflow-hidden border border-white/[0.08] shadow-[0_0_80px_-20px_rgba(0,0,0,1)] relative z-10">
         
-        {/* Mobile Background Effects */}
-        <div className="absolute inset-0 md:hidden bg-gradient-to-br from-background to-black pointer-events-none">
-          <div className="absolute top-20 left-10 w-40 h-40 bg-amber-500/10 blur-[80px] rounded-full" />
+        {/* LEFT SIDE - Branding */}
+        <div className="relative w-full md:w-1/2 p-10 flex flex-col justify-between bg-black overflow-hidden border-r border-white/[0.04]">
+          
+          {/* Layer 1: Colored base shapes */}
+          <div className="w-[22rem] h-[18rem] bg-amber-500 absolute z-[1] rounded-full -bottom-10 -left-2"></div>
+          <div className="w-[18rem] h-[4rem] bg-white absolute z-[1] rounded-full bottom-11 left-40"></div>
+          <div className="w-[8rem] h-[3rem] bg-white absolute z-[1] rounded-full bottom-0 right-0"></div>
+
+          {/* Layer 2: Backdrop blur strips to create curtain effect */}
+          <div className="flex absolute inset-0 z-[2] overflow-hidden backdrop-blur-2xl w-full h-full pointer-events-none">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-full flex-1 bg-gradient-to-r from-transparent via-[#000000] via-[69%] to-[#ffffff30] opacity-30 overflow-hidden"></div>
+            ))}
+          </div>
+
+          {/* Layer 3: Fade to black towards the top */}
+          <div className="w-full h-full z-[3] absolute inset-0 bg-gradient-to-t from-transparent to-black pointer-events-none"></div>
+
+          {/* Top Text */}
+          <div className="relative z-[10] mt-4">
+            <h1 className="text-[30px] font-bold tracking-tight leading-[1.2] text-white/90">
+              You're one click away from better code.
+            </h1>
+          </div>
+          
+          {/* <div className="relative z-[10] hidden md:block mt-auto text-white/20 font-mono text-[10px] tracking-widest uppercase">
+            dura authentication
+          </div> */}
         </div>
 
-        <div className="relative z-10 w-full max-w-sm">
+        {/* RIGHT SIDE - Auth Content */}
+        <div className="w-full md:w-1/2 p-10 lg:p-14 flex flex-col justify-center relative bg-[#0c0c0c]">
           
-          {/* Card */}
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
-            
-            {/* Inner Top Glow */}
-            <div className="absolute top-0 inset-x-0 h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-            
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-semibold tracking-tight mb-2">Sign in to dura</h2>
-              <p className="text-sm text-white/50">No password required</p>
+          {/* Back to Home Button */}
+          <Link 
+            to="/" 
+            className="absolute top-8 left-8 lg:top-10 lg:left-13 flex items-center gap-0.5 text-white/50 hover:text-white transition-colors z-20 group"
+          >
+            <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-0.5" />
+            <span className="text-[15px] font-medium tracking-wide">Home</span>
+          </Link>
+
+          <div className="max-w-[340px] w-full mx-auto relative z-10">
+            {/* Header matching image style */}
+            <div className="mb-8">
+              <Logo className="w-8 h-8 text-accent mb-6" />
+              <h2 className="text-2xl font-semibold tracking-tight text-white/95 mb-2">Get Started</h2>
+              <p className="text-[14px] text-white/50 leading-relaxed">
+                Welcome to dura :) Connect your GitHub and start shipping with confidence.
+              </p>
             </div>
 
-            <button
-              onClick={handleLogin}
-              disabled={isLoading}
-              className={cn(
-                "group relative w-full flex items-center justify-center gap-3 px-4 py-3.5",
-                "bg-white/5 hover:bg-white/10 active:bg-white/5",
-                "border border-white/10 hover:border-white/20",
-                "rounded-xl font-medium tracking-wide transition-all duration-300 ease-out",
-                "hover:-translate-y-0.5 shadow-sm hover:shadow-md hover:shadow-white/5 hover:shadow-amber-500/10",
-                "disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0"
-              )}
-            >
-              {isLoading ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white/20 border-t-white/90 rounded-full animate-spin" />
-                  <span>Redirecting...</span>
-                </>
-              ) : (
-                <>
-                  <Github className="w-5 h-5 opacity-90 group-hover:opacity-100 transition-opacity duration-300" />
-                  <span>Continue with GitHub</span>
-                </>
-              )}
-              
-              {/* Button Ambient Glow Overlay */}
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none mix-blend-overlay" />
-            </button>
-            
-            {/* Footer Text */}
-            <p className="mt-8 text-center text-xs text-white/40">
-              New to dura?{" "}
-              <span className="text-white/70 transition-colors duration-300">
-                Create your account
-              </span>
-            </p>
+            {/* Action Area */}
+            <div className="space-y-6">
+              <button
+                onClick={handleLogin}
+                disabled={isLoading}
+                className={cn(
+                  "group relative w-full flex items-center justify-center gap-3 px-4 py-3",
+                  "bg-amber-500/5 text-amber-500/90 font-medium",
+                  "rounded-xl transition-all border border-amber-500/20",
+                  "hover:bg-amber-500/15 hover:border-amber-500/40 hover:text-amber-400",
+                  "hover:-translate-y-0.5 shadow-sm hover:shadow-md hover:shadow-amber-500/10",
+                  "disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                )}
+              >
+                {isLoading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Redirecting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Github className="w-5 h-5 opacity-90 group-hover:opacity-100 transition-opacity" />
+                    <span>Continue with GitHub</span>
+                  </>
+                )}
+              </button>
+
+              {/* Login hint / footer */}
+              <p className="text-center text-[13px] text-white/40 pt-4">
+                New to dura?{" "}
+                <button 
+                  onClick={handleLogin}
+                  disabled={isLoading}
+                  className="text-white/80 hover:text-white transition-colors cursor-pointer border-b border-white/20 hover:border-white disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Create an account
+                </button>
+              </p>
+            </div>
           </div>
         </div>
       </div>

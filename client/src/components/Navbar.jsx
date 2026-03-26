@@ -78,7 +78,7 @@ export function Navbar() {
                 Login
               </Link>
               <a
-                href={`${import.meta.env.VITE_BACKEND_URL}/auth/connect`}
+                href={`${import.meta.env.VITE_BACKEND_URL}/connect/github`}
                 className="flex items-center gap-2 bg-white/10 hover:bg-white/15 text-primary text-[13px] font-medium px-3 py-1.5 rounded-full transition-all border border-white/5 hover:border-white/10"
               >
                 <Github size={14} />

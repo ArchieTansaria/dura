@@ -4,7 +4,7 @@ import { cn } from "../utils/utils";
 
 export const BackgroundRippleEffect = ({
   rows = 16,
-  cols = 30,
+  cols = 35,
   cellSize = 58
 }) => {
   const [clickedCell, setClickedCell] = useState(null);
