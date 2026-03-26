@@ -64,8 +64,8 @@ export const callback = async (req: Request, res: Response) => {
     //1
     const { code, state } = req.query
 
-    console.log("SESSION STATE:", req.session.oauthState);
-    console.log("QUERY STATE:", state);
+    // console.log("SESSION STATE:", req.session.oauthState);
+    // console.log("QUERY STATE:", state);
   
     //2 
     if (typeof state !== 'string' || state != req.session.oauthState){

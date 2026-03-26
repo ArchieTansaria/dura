@@ -55,7 +55,9 @@ export const dashboard = async (req: Request, res: Response) => {
               name: repo.name,
               full_name: repo.full_name,
               url: repo.html_url,
-              private: repo.private
+              private: repo.private,
+              updated_at: repo.updated_at,
+              avatar_url: repo.owner?.avatar_url
             }))
           }
           
