@@ -7,7 +7,7 @@ import githubApp from '../config/github.js'
 
 export const login = (req: Request, res: Response) => {
   if (req.session.userId) {
-    return res.redirect("/api/dashboard");
+    return res.redirect(`${getEnv('FRONTEND_URL')}/dashboard`);
   }
 
   req.session.oauthIntent = "login";
@@ -155,7 +155,7 @@ export const callback = async (req: Request, res: Response) => {
         }
 
         //user only wanted to login, send to dashboard
-        return res.redirect("/api/dashboard");
+        return res.redirect(`${getEnv('FRONTEND_URL')}/dashboard`);
       });
     });
   
@@ -203,7 +203,7 @@ export const installApp = async (req: Request, res: Response) => {
     );
 
     //redirect to dashboard
-    return res.redirect("/api/dashboard");
+    return res.redirect(`${getEnv('FRONTEND_URL')}/dashboard`);
     
   } catch (error) {
     console.error(error);
