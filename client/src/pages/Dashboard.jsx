@@ -16,7 +16,7 @@ export default function Dashboard() {
   useEffect(() => {
     async function fetchDashboard() {
       try {
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/dashboard`, {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/dashboard`, {
           credentials: 'include'
         });
         if (res.ok) {
