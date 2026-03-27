@@ -5,16 +5,16 @@ export function EmptyState({ type = 'install' }) {
   const isInstall = type === 'install';
 
   return (
-    <div className="w-full flex-col flex items-center justify-center py-24 px-4 border border-white/5 rounded-2xl bg-black/20 backdrop-blur-sm border-dashed">
-      <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 shadow-inner ring-1 ring-white/5">
-        <Github className="w-8 h-8 text-white/50" />
+    <div className="w-full flex-col flex items-center justify-center py-24 px-4 border border-gray-200 dark:border-white/5 rounded-2xl bg-white/50 dark:bg-black/20 backdrop-blur-sm border-dashed">
+      <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 flex items-center justify-center mb-6 shadow-inner ring-1 ring-black/5 dark:ring-white/5">
+        <Github className="w-8 h-8 text-gray-400 dark:text-white/50" />
       </div>
       
-      <h3 className="text-lg font-semibold text-white/90 tracking-tight mb-2">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white/90 tracking-tight mb-2">
         {isInstall ? "Connect GitHub to get started" : "Add your first repository"}
       </h3>
       
-      <p className="text-sm text-white/40 mb-8 max-w-sm text-center leading-relaxed">
+      <p className="text-sm text-gray-500 dark:text-white/40 mb-8 max-w-sm text-center leading-relaxed">
         {isInstall 
           ? "Connect your GitHub account to install the dura app and begin protecting your codebase." 
           : "You've successfully installed dura. Now add your first repository to get started with risk analysis."}
@@ -25,8 +25,8 @@ export function EmptyState({ type = 'install' }) {
           href={`${import.meta.env.VITE_BACKEND_URL}/connect/github`}
           className={cn(
             "group relative inline-flex items-center justify-center gap-2",
-            "bg-white/10 hover:bg-white/15 text-white font-medium",
-            "px-6 py-2.5 rounded-full transition-all border border-white/5 hover:border-white/10",
+            "bg-white dark:bg-white/10 hover:bg-gray-50 dark:hover:bg-white/15 text-gray-900 dark:text-white font-medium",
+            "px-6 py-2.5 rounded-full transition-all border border-gray-200 dark:border-white/5 hover:border-gray-300 dark:hover:border-white/10",
             "hover:-translate-y-0.5 shadow-sm"
           )}
         >
@@ -34,7 +34,8 @@ export function EmptyState({ type = 'install' }) {
           <span className="text-[14px]">Connect GitHub</span>
         </a>
       ) : (
-        <button
+        <a
+          href={`${import.meta.env.VITE_BACKEND_URL}/connect/github`}
           className={cn(
             "group relative inline-flex items-center justify-center gap-2",
             "bg-accent hover:bg-amber-500 text-white font-medium border border-transparent",
@@ -44,7 +45,7 @@ export function EmptyState({ type = 'install' }) {
         >
           <Plus className="w-4 h-4" />
           <span className="text-[14px]">Add Repository</span>
-        </button>
+        </a>
       )}
     </div>
   );
