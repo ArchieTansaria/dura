@@ -85,7 +85,7 @@ export function ProfileDropdown() {
         <div className="p-1.5 flex flex-col">
           {/* Theme Row */}
           <div className="flex items-center justify-between px-2.5 py-2">
-            <span className="text-[13px] text-gray-900 dark:text-white/80 font-semibold">Theme</span>
+            <span className="text-[13px] text-gray-900 dark:text-white/80 font-medium">Theme</span>
             <div className="flex items-center gap-0.5 bg-gray-100 dark:bg-white/5 p-0.5 rounded-lg border border-gray-300 dark:border-white/5">
               <button 
                 onClick={() => setTheme('light')}
@@ -113,7 +113,7 @@ export function ProfileDropdown() {
           {/* Account Settings */}
           <button className="flex items-center gap-2.5 w-full px-2.5 py-2 text-left text-[13px] text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors group">
             <Settings className="w-4 h-4 text-gray-500 dark:text-white/40 group-hover:text-gray-900 dark:group-hover:text-white/80 transition-colors" />
-            <span className="font-semibold">Account Settings</span>
+            <span className="font-medium">Account Settings</span>
           </button>
 
           <div className="h-px w-full bg-gray-200 dark:bg-white/5 my-1" />
@@ -121,7 +121,7 @@ export function ProfileDropdown() {
           {/* Logout Action */}
           <a href={`${import.meta.env.VITE_BACKEND_URL}/logout`} className="flex items-center gap-2.5 w-full px-2.5 py-2 text-left text-[13px] text-gray-700 dark:text-white/80 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 rounded-lg transition-colors group">
             <LogOut className="w-4 h-4 text-gray-500 dark:text-white/40 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors" />
-            <span className="font-semibold">Logout</span>
+            <span className="font-medium">Logout</span>
           </a>
         </div>
       </div>

@@ -49,8 +49,8 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-background text-gray-900 dark:text-foreground font-sans selection:bg-accent/30 flex relative overflow-hidden">
-      <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
-      <Topbar isCollapsed={isCollapsed} />
+      <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} installState={installState} />
+      <Topbar isCollapsed={isCollapsed} installState={installState} />
 
       {/* Main Content Area */}
       <main className={cn(

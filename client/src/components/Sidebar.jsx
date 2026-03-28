@@ -16,7 +16,7 @@ const bottomNavigation = [
   { name: 'Settings', icon: Settings },
 ];
 
-export function Sidebar({ isCollapsed, setIsCollapsed }) {
+export function Sidebar({ isCollapsed, setIsCollapsed, installState }) {
   return (
     <aside className={cn(
       "h-screen fixed top-0 left-0 flex flex-col bg-white/90 dark:bg-black/40 backdrop-blur-md border-r border-gray-300 dark:border-white/5 z-40 transition-all duration-300",
@@ -41,18 +41,18 @@ export function Sidebar({ isCollapsed, setIsCollapsed }) {
             className={cn(
               "flex items-center rounded-xl transition-all duration-300",
               isCollapsed ? "justify-center p-3" : "justify-between px-3 py-2",
-              item.active 
+              item.active
                 ? "bg-white dark:bg-white/5 text-gray-900 dark:text-white shadow-sm border border-gray-200 dark:border-transparent" 
-                : "text-gray-500 dark:text-white/50 hover:bg-gray-100 dark:hover:bg-white/[0.03] hover:text-gray-900 dark:hover:text-white/80 cursor-pointer border border-transparent",
+                : "text-gray-600 dark:text-white/50 hover:bg-gray-500 dark:hover:bg-white/[0.03] hover:text-gray-950 dark:hover:text-white/80 cursor-pointer border border-transparent",
               item.locked && "opacity-50 cursor-not-allowed hover:bg-transparent dark:hover:bg-transparent"
             )}
             title={isCollapsed ? item.name : undefined}
           >
             <div className={cn("flex items-center", !isCollapsed && "gap-3")}>
               <item.icon className="w-4 h-4 shrink-0" />
-              {!isCollapsed && <span className="text-[13px] font-semibold tracking-wide">{item.name}</span>}
+              {!isCollapsed && <span className="text-[13px] font-medium tracking-wide">{item.name}</span>}
             </div>
-            {!isCollapsed && item.locked && <Lock className="w-3 h-3 text-gray-400 dark:text-white/30 shrink-0" />}
+            {!isCollapsed && item.locked && <Lock className="w-3 h-3 text-gray-500 dark:text-white/30 shrink-0" />}
           </div>
         ))}
       </div>
@@ -76,21 +76,23 @@ export function Sidebar({ isCollapsed, setIsCollapsed }) {
         )}
       </div>
 
-      <div className="px-3 pb-6 pt-4 border-t border-gray-200 dark:border-white/5 space-y-1">
-        {bottomNavigation.map((item) => (
-          <div
-            key={item.name}
-            className={cn(
-              "flex items-center rounded-xl text-gray-500 dark:text-white/50 hover:bg-gray-100 dark:hover:bg-white/[0.03] hover:text-gray-900 dark:hover:text-white/80 cursor-pointer transition-all duration-300",
-              isCollapsed ? "justify-center p-3" : "gap-3 px-3 py-2"
-            )}
-            title={isCollapsed ? item.name : undefined}
-          >
-            <item.icon className="w-4 h-4 shrink-0" />
-            {!isCollapsed && <span className="text-[13px] font-medium tracking-wide">{item.name}</span>}
-          </div>
-        ))}
-      </div>
+      {installState === 'has-repos' && (
+        <div className="px-3 pb-6 pt-4 border-t border-gray-200 dark:border-white/5 space-y-1">
+          {bottomNavigation.map((item) => (
+            <div
+              key={item.name}
+              className={cn(
+                "flex items-center rounded-xl text-gray-500 dark:text-white/50 hover:bg-gray-100 dark:hover:bg-white/[0.03] hover:text-gray-900 dark:hover:text-white/80 cursor-pointer transition-all duration-300",
+                isCollapsed ? "justify-center p-3" : "gap-3 px-3 py-2"
+              )}
+              title={isCollapsed ? item.name : undefined}
+            >
+              <item.icon className="w-4 h-4 shrink-0" />
+              {!isCollapsed && <span className="text-[13px] font-medium tracking-wide">{item.name}</span>}
+            </div>
+          ))}
+        </div>
+      )}
     </aside>
   );
 }

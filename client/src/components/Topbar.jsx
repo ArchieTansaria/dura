@@ -2,7 +2,9 @@ import { Search } from 'lucide-react';
 import { ProfileDropdown } from './ProfileDropdown';
 import { cn } from '../utils/utils';
 
-export function Topbar({ isCollapsed }) {
+export function Topbar({ isCollapsed, installState }) {
+  const showProfile = installState === 'has-repos';
+
   return (
     <header className={cn(
       "h-[60px] fixed top-0 left-0 right-0 z-30 bg-white/80 dark:bg-black/40 backdrop-blur-md border-b border-gray-200 dark:border-white/5 flex items-center justify-between px-8 transition-all duration-300",
@@ -23,9 +25,11 @@ export function Topbar({ isCollapsed }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-4 pl-4">
-        <ProfileDropdown />
-      </div>
+      {showProfile && (
+        <div className="flex items-center gap-4 pl-4">
+          <ProfileDropdown />
+        </div>
+      )}
     </header>
   );
 }

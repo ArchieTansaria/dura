@@ -21,7 +21,7 @@ export function RepoTable({ repos = [] }) {
               <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
                   <div className="w-6 h-6 rounded-md bg-gray-100 dark:bg-white/5 border border-gray-300 dark:border-white/5 flex items-center justify-center shrink-0">
-                    <span className="text-[11px] font-mono font-semibold text-gray-600 dark:text-white/50">{index + 1}</span>
+                    <span className="text-[11px] font-mono font-medium text-gray-600 dark:text-white/50">{index + 1}</span>
                   </div>
                   <span className="font-semibold text-gray-900 dark:text-white/90 group-hover:text-black dark:group-hover:text-white transition-colors">{repo.name}</span>
                 </div>
