@@ -14,4 +14,4 @@ RUN npm run build
 
 RUN npm prune --production
 
-CMD ["node", "dist/workers/pr.worker.js"]
+CMD ["node", " dist/workers/index.js"]
