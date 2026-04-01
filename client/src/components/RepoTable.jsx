@@ -1,7 +1,9 @@
 import { Github, Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '../utils/utils';
 
 export function RepoTable({ repos = [] }) {
+  const navigate = useNavigate();
   if (!repos.length) return null;
 
   return (
@@ -17,7 +19,11 @@ export function RepoTable({ repos = [] }) {
         </thead>
         <tbody className="divide-y divide-gray-200 dark:divide-white/5">
           {repos.map((repo, index) => (
-            <tr key={repo.id} className="group hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors duration-300">
+            <tr 
+              key={repo.id} 
+              onClick={() => navigate(`/repo/${repo.owner.login}/${repo.name}`)}
+              className="group hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors duration-300 cursor-pointer"
+            >
               <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
                   <div className="w-6 h-6 rounded-md bg-gray-100 dark:bg-white/5 border border-gray-300 dark:border-white/5 flex items-center justify-center shrink-0">
@@ -47,8 +53,11 @@ export function RepoTable({ repos = [] }) {
                 </div>
               </td>
               <td className="px-6 py-4 text-right">
-                <button className="text-gray-600 hover:text-gray-900 dark:text-white/40 dark:hover:text-white font-semibold bg-transparent hover:bg-gray-200 dark:hover:bg-white/5 px-3 py-1.5 rounded-lg transition-all border border-transparent hover:border-gray-300 dark:hover:border-white/10">
-                  Settings
+                <button 
+                  onClick={(e) => { e.stopPropagation(); navigate(`/repo/${repo.owner.login}/${repo.name}`); }}
+                  className="text-gray-600 hover:text-gray-900 dark:text-white/40 dark:hover:text-white font-semibold bg-transparent hover:bg-gray-200 dark:hover:bg-white/5 px-3 py-1.5 rounded-lg transition-all border border-transparent hover:border-gray-300 dark:hover:border-white/10"
+                >
+                  View Details
                 </button>
               </td>
             </tr>
