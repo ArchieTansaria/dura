@@ -36,9 +36,18 @@ export const analysisWorker = new Worker('AnalysisQueue', async (job: Job) => {
 
   } catch (error: any) {
     console.error(`[scan.worker] Failed scan for ${repoFullName}:`, error);
-    analysisDoc.status = 'failed';
-    analysisDoc.error = error.message || 'Unknown error occurred during analysis';
-    await analysisDoc.save();
+    
+    const maxAttempts = job.opts.attempts || 1;
+    // If this job is going to be retried by BullMQ, delete this pending document to avoid duplicates
+    if (job.attemptsMade < maxAttempts - 1) {
+      await Analysis.deleteOne({ _id: analysisDoc._id });
+    } else {
+      // If it's the final attempt, officially mark it as failed
+      analysisDoc.status = 'failed';
+      analysisDoc.error = error.message || 'Unknown error occurred during analysis';
+      await analysisDoc.save();
+    }
+    
     throw error; 
   }
 },

@@ -175,7 +175,9 @@ export const installApp = async (req: Request, res: Response) => {
   }
 
   if (!req.session.userId) {
-    return res.status(401).send('Not authenticated, please login'); //TODO check if we want to redirect to /auth/github here
+    //force the oauth flow is the user arrives anonymously
+    req.session.oauthIntent = 'install';
+    return res.redirect('/auth/github');
   }
 
   try {
