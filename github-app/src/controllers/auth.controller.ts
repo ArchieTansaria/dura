@@ -233,6 +233,11 @@ export const getMe = async (req: Request, res: Response) => {
     }
     const user = await User.findById(req.session.userId).select('-accessToken');
     if (!user) {
+      // Phantom session (user deleted from DB but session persists in Redis)
+      req.session.destroy((err) => {
+        if (err) console.error("Failed to destroy phantom session:", err);
+      });
+      res.clearCookie("connect.sid");
       return res.status(401).json({ user: null });
     }
     return res.json({ user });
