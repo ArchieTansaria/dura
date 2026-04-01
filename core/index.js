@@ -9,6 +9,7 @@ const { semverDiff } = require("./src/semverDiff");
 const { computeRisk } = require("./src/risk");
 const { scrapeManyReleases, normalizeGitHubUrl, defaultReleaseResult } = require("./src/scrapeReleases");
 const { analyzeDependency, buildReportItem } = require("./src/analyzeDependency");
+const { aggregateRisk } = require("./src/aggregate");
 const { logStep } = require("./utils/logger");
 
 /**
@@ -78,4 +79,4 @@ async function analyzeRepository({ repoUrl, branch = "main", scrapeMode = "seque
   return report;
 }
 
-module.exports = { analyzeRepository };
+module.exports = { analyzeRepository, aggregateRisk };
