@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Sidebar } from '../components/Sidebar';
 import { Topbar } from '../components/Topbar';
 import { cn } from '../utils/utils';
-import { GitBranch, Clock, AlertTriangle, ShieldAlert, CheckCircle2, FileCode, Package, RefreshCw, XCircle, Loader2 } from 'lucide-react';
+import { GitBranch, Clock, AlertTriangle, ShieldAlert, CheckCircle2, FileCode, Package, RefreshCw, XCircle, Loader2, Rocket, ArrowLeft } from 'lucide-react';
 
 const statusColors = {
   SAFE: 'text-green-500 bg-green-500/10 border-green-500/20',
@@ -27,7 +27,10 @@ const mapRiskLevel = (level) => {
 export default function RepoDetail() {
   const { owner, name } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const repoFullName = `${owner}/${name}`;
+  
+  const isPrivate = location.state?.isPrivate || false;
   
   const [activeTab, setActiveTab] = useState('overview');
   const [analysis, setAnalysis] = useState(null);
@@ -38,6 +41,11 @@ export default function RepoDetail() {
 
   const fetchAnalysis = async (isPolling = false) => {
     try {
+      if (isPrivate) {
+        setLoading(false);
+        return;
+      }
+      
       if (!isPolling) setLoading(!analysis);
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/repo/${owner}/${name}`, {
         credentials: 'include'
@@ -125,7 +133,7 @@ export default function RepoDetail() {
               <div className="flex items-center gap-3 mb-2">
                 <FileCode className="w-5 h-5 text-white/50" />
                 <h1 className="text-2xl font-mono font-medium tracking-tight text-white">
-                  {repoFullName}
+                  {name}
                 </h1>
               </div>
               <div className="flex items-center gap-4 text-[13px] text-white/40">
@@ -144,13 +152,13 @@ export default function RepoDetail() {
 
             <button
               onClick={handleScan}
-              disabled={isScanning || loading}
+              disabled={isScanning || loading || isPrivate}
               className={cn(
                 "group relative inline-flex items-center justify-center gap-2",
                 "bg-accent hover:bg-amber-500 text-white font-medium border border-transparent",
                 "px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-accent/20",
                 "hover:-translate-y-0.5",
-                (isScanning || loading) && "opacity-70 cursor-not-allowed hover:-translate-y-0"
+                (isScanning || loading || isPrivate) && "opacity-50 cursor-not-allowed hover:-translate-y-0 hover:bg-accent"
               )}
             >
               {isScanning ? (
@@ -164,7 +172,37 @@ export default function RepoDetail() {
             </button>
           </div>
 
-          {loading ? (
+          {isPrivate ? (
+             <div className="flex-1 w-full flex-col flex items-center justify-center py-24 mt-6 border border-white/5 rounded-2xl bg-black/20 backdrop-blur-sm border-dashed relative overflow-hidden">
+                {/* Subtle radial glow in the background */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-accent/20 blur-[100px] rounded-full pointer-events-none" />
+                
+                <div className="flex items-center justify-center mb-6 relative z-10">
+                  <Rocket className="w-10 h-10 text-accent drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]" />
+                </div>
+                
+                <h3 className="text-xl font-semibold text-white/90 tracking-tight mb-2 relative z-10">
+                  Private Analysis Coming Soon
+                </h3>
+                
+                <p className="text-sm text-white/40 mb-8 max-w-sm text-center leading-relaxed">
+                  Deep dependency analysis for private repositories is actively in development. We are actively rolling out private beta scopes in our next major release.
+                </p>
+                
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className={cn(
+                    "group relative inline-flex items-center justify-center gap-2",
+                    "bg-white/10 hover:bg-white/15 text-white font-medium",
+                    "px-6 py-2.5 rounded-full transition-all border border-white/5 hover:border-white/10",
+                    "hover:-translate-y-0.5 shadow-sm"
+                  )}
+                >
+                  <ArrowLeft className="w-4 h-4 opacity-80 group-hover:opacity-100" />
+                  <span className="text-[14px]">Back to dashboard</span>
+                </button>
+             </div>
+          ) : loading ? (
              <div className="flex-1 flex items-center justify-center">
                <Loader2 className="w-8 h-8 animate-spin text-accent/50" />
              </div>

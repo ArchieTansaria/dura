@@ -3,6 +3,7 @@ import { Home } from './pages/Home';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import RepoDetail from './pages/RepoDetail';
+import Settings from './pages/Settings';
 import { ThemeProvider } from './contexts/ThemeContext';
 
 function App() {
@@ -14,6 +15,8 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/api/dashboard" element={<Dashboard />} />
         <Route path="/repo/:owner/:name" element={<RepoDetail />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/account" element={<Settings />} />
       </Routes>
     </ThemeProvider>
   );

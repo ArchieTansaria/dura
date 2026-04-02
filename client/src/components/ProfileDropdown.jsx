@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Sun, Moon, Monitor, Settings, LogOut, ChevronDown } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -8,6 +9,7 @@ export function ProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const dropdownRef = useRef(null);
+  const navigate = useNavigate();
   
   // Conditionally use auth to avoid crash if provider is missing.
   // We assume AuthProvider does wrap the router where this is used.
@@ -111,7 +113,10 @@ export function ProfileDropdown() {
           <div className="h-px w-full bg-gray-200 dark:bg-white/5 my-1" />
 
           {/* Account Settings */}
-          <button className="flex items-center gap-2.5 w-full px-2.5 py-2 text-left text-[13px] text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors group">
+          <button 
+            onClick={() => { setIsOpen(false); navigate('/settings'); }}
+            className="flex items-center gap-2.5 w-full px-2.5 py-2 text-left text-[13px] text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors group"
+          >
             <Settings className="w-4 h-4 text-gray-500 dark:text-white/40 group-hover:text-gray-900 dark:group-hover:text-white/80 transition-colors" />
             <span className="font-medium">Account Settings</span>
           </button>

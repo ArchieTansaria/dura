@@ -1,11 +1,12 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import { Logo } from './Logo';
 import { cn } from '../utils/utils';
 import { Database, ChartArea, Blocks, BarChart3, User, Settings, Lock, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import Typewriter from './typewriter';
 
 const mainNavigation = [
-  { name: 'Repositories', icon: Database, active: true },
+  { name: 'Repositories', path: '/dashboard', icon: Database, active: true },
   { name: 'Analytics', icon: ChartArea, locked: true },
   { name: 'Integrations', icon: Blocks, locked: true },
   { name: 'Reports', icon: BarChart3, locked: true },
@@ -17,6 +18,10 @@ const bottomNavigation = [
 ];
 
 export function Sidebar({ isCollapsed, setIsCollapsed, installState }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [hoverInfo, setHoverInfo] = useState(null);
+  
   return (
     <aside className={cn(
       "h-screen fixed top-0 left-0 flex flex-col bg-white/90 dark:bg-black/40 backdrop-blur-md border-r border-gray-300 dark:border-white/5 z-40 transition-all duration-300",
@@ -35,27 +40,52 @@ export function Sidebar({ isCollapsed, setIsCollapsed, installState }) {
       </div>
 
       <div className="flex-1 px-3 py-4 space-y-1">
-        {mainNavigation.map((item) => (
-          <div
-            key={item.name}
-            className={cn(
-              "flex items-center rounded-xl transition-all duration-300",
-              isCollapsed ? "justify-center p-3" : "justify-between px-3 py-2",
-              item.active
-                ? "bg-white dark:bg-white/5 text-gray-900 dark:text-white shadow-sm border border-gray-200 dark:border-transparent" 
-                : "text-gray-600 dark:text-white/50 hover:bg-gray-500 dark:hover:bg-white/[0.03] hover:text-gray-950 dark:hover:text-white/80 cursor-pointer border border-transparent",
-              item.locked && "opacity-50 cursor-not-allowed hover:bg-transparent dark:hover:bg-transparent"
-            )}
-            title={isCollapsed ? item.name : undefined}
-          >
-            <div className={cn("flex items-center", !isCollapsed && "gap-3")}>
-              <item.icon className="w-4 h-4 shrink-0" />
-              {!isCollapsed && <span className="text-[13px] font-medium tracking-wide">{item.name}</span>}
+        {mainNavigation.map((item) => {
+          // Check if active based on path
+          const isActive = item.name === 'Repositories' 
+            ? (location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/repo'))
+            : item.active;
+
+          return (
+            <div
+              key={item.name}
+              onMouseMove={(e) => {
+                if (item.locked) {
+                  setHoverInfo({ x: e.clientX, y: e.clientY });
+                }
+              }}
+              onMouseLeave={() => setHoverInfo(null)}
+              onClick={() => {
+                if (!item.locked && item.path) navigate(item.path);
+              }}
+              className={cn(
+                "group relative flex items-center rounded-xl transition-all duration-300",
+                isCollapsed ? "justify-center p-3" : "justify-between px-3 py-2",
+                isActive
+                  ? "bg-white dark:bg-white/5 text-gray-900 dark:text-white shadow-sm border border-gray-200 dark:border-transparent" 
+                  : "text-gray-600 dark:text-white/50 hover:bg-gray-500 dark:hover:bg-white/[0.03] hover:text-gray-950 dark:hover:text-white/80 cursor-pointer border border-transparent",
+                item.locked && "opacity-50 cursor-not-allowed hover:bg-transparent dark:hover:bg-transparent"
+              )}
+            >
+              <div className={cn("flex items-center", !isCollapsed && "gap-3")}>
+                <item.icon className="w-4 h-4 shrink-0" />
+                {!isCollapsed && <span className="text-[13px] font-medium tracking-wide">{item.name}</span>}
+              </div>
+              {!isCollapsed && item.locked && <Lock className="w-3 h-3 text-gray-500 dark:text-white/30 shrink-0" />}
             </div>
-            {!isCollapsed && item.locked && <Lock className="w-3 h-3 text-gray-500 dark:text-white/30 shrink-0" />}
-          </div>
-        ))}
+          );
+        })}
       </div>
+
+      {/* Global Cursor-Tracking Tooltip */}
+      {hoverInfo && (
+        <div 
+          className="fixed z-[100] px-2.5 py-1 bg-gray-900 dark:bg-white/40 text-white dark:text-black text-[11px] font-bold rounded-md pointer-events-none whitespace-nowrap shadow-xl animate-in fade-in duration-100"
+          style={{ left: hoverInfo.x + 12, top: hoverInfo.y + 12 }}
+        >
+          Coming soon!
+        </div>
+      )}
 
       <div className="px-3 mb-2 flex justify-center">
         {isCollapsed ? (
@@ -81,6 +111,7 @@ export function Sidebar({ isCollapsed, setIsCollapsed, installState }) {
           {bottomNavigation.map((item) => (
             <div
               key={item.name}
+              onClick={() => navigate(`/${item.name.toLowerCase()}`)}
               className={cn(
                 "flex items-center rounded-xl text-gray-500 dark:text-white/50 hover:bg-gray-100 dark:hover:bg-white/[0.03] hover:text-gray-900 dark:hover:text-white/80 cursor-pointer transition-all duration-300",
                 isCollapsed ? "justify-center p-3" : "gap-3 px-3 py-2"

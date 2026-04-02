@@ -21,7 +21,7 @@ export function RepoTable({ repos = [] }) {
           {repos.map((repo, index) => (
             <tr 
               key={repo.id} 
-              onClick={() => navigate(`/repo/${repo.owner.login}/${repo.name}`)}
+              onClick={() => navigate(`/repo/${repo.full_name}`, { state: { isPrivate: repo.private } })}
               className="group hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors duration-300 cursor-pointer"
             >
               <td className="px-6 py-4">
@@ -54,7 +54,7 @@ export function RepoTable({ repos = [] }) {
               </td>
               <td className="px-6 py-4 text-right">
                 <button 
-                  onClick={(e) => { e.stopPropagation(); navigate(`/repo/${repo.owner.login}/${repo.name}`); }}
+                  onClick={(e) => { e.stopPropagation(); navigate(`/repo/${repo.full_name}`, { state: { isPrivate: repo.private } }); }}
                   className="text-gray-600 hover:text-gray-900 dark:text-white/40 dark:hover:text-white font-semibold bg-transparent hover:bg-gray-200 dark:hover:bg-white/5 px-3 py-1.5 rounded-lg transition-all border border-transparent hover:border-gray-300 dark:hover:border-white/10"
                 >
                   View Details
