@@ -1,0 +1,33 @@
+# Stage 1: Build environment
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm ci
+
+# Copy source code and build
+COPY . .
+RUN npm run build
+
+# Stage 2: Production environment
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+# Set Node to production environment
+ENV NODE_ENV=production
+
+# Copy package files and install ONLY production dependencies
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+# Copy compiled code from builder stage
+COPY --from=builder /app/dist ./dist
+
+# Run as non-root user for better security
+USER node
+
+# Default command starts the API
+CMD ["npm", "start"]
