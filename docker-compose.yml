@@ -1,0 +1,79 @@
+services:
+  # Local Redis instance for session and job queues
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  # Main API backend server
+  api:
+    build:
+      context: ./github-app
+      dockerfile: Dockerfile.api
+      target: builder # Targets the first stage so we have dev tools available
+    command: npm run dev:app
+    ports:
+      - "3000:3000"
+    volumes:
+      # Sync your local files for live-reloading!
+      - ./github-app:/app
+      # Ignore the local node_modules structure to prevent architecture conflicts
+      - /app/node_modules
+    env_file:
+      - ./github-app/.env
+    # Optional override for redis url if you want to use the local one automatically
+    # environment:
+    #   - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+
+  # Background Queue worker (running playwright)
+  worker:
+    build:
+      context: ./github-app
+      dockerfile: Dockerfile.worker
+      target: builder # Uses playwright environment
+    command: npm run dev:worker
+    volumes:
+      - ./github-app:/app
+      - /app/node_modules
+    env_file:
+      - ./github-app/.env
+    # environment:
+    #   - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+      - api
+
+  # Frontend Vite app
+  client:
+    image: node:20-alpine
+    working_dir: /app
+    # Installs deps if missing, then starts Vite server attached to 0.0.0.0
+    command: sh -c "npm install && npm run dev -- --host"
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    environment:
+      # Automatically pass the local API URL to the Vite frontend
+      - VITE_API_URL=http://localhost:3000
+
+  # Local Ngrok tunnel wrapper
+  ngrok:
+    image: ngrok/ngrok:latest
+    restart: unless-stopped
+    ports:
+      - "4040:4040"
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+    # Uses your static domain from the .env file!
+    command: http --url=unaromatic-undelectably-billye.ngrok-free.dev api:3000
+    depends_on:
+      - api
+
+
+## docker command example
+## NGROK_AUTHTOKEN="<your_token>" docker compose --env-file ./github-app/.env up --build
