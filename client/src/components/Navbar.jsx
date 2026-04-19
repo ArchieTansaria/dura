@@ -9,10 +9,10 @@ import { useAuth } from '../contexts/AuthContext';
 const cn = (...inputs) => twMerge(clsx(inputs));
 
 const NAV_LINKS = [
-  { label: 'Features', href: '#features' },
-  { label: 'Docs', href: '#' },
-  { label: 'Dashboard', href: '#' },
-  { label: 'Contact', href: '#' },
+  { label: 'Features', href: '#features', type: 'anchor' },
+  { label: 'Docs', href: 'https://github.com/ArchieTansaria/dura#readme', type: 'external' },
+  { label: 'Dashboard', href: '/dashboard', type: 'route' },
+  { label: 'Contact', href: '#footer', type: 'anchor' },
 ];
 
 export function Navbar() {
@@ -37,22 +37,43 @@ export function Navbar() {
           : "max-w-5xl bg-black/40 border-white/5"
       )}>
         {/* Left: Brand */}
-        <a href="/" className="flex items-center gap-3 pl-1 font-mono font-medium text-primary text-sm tracking-tight opacity-90 hover:opacity-100 transition-opacity">
+        <Link to="/" className="flex items-center gap-3 pl-1 font-mono font-medium text-primary text-sm tracking-tight opacity-90 hover:opacity-100 transition-opacity">
           <Logo className="text-accent w-6 h-6" />
           <span>dura</span>
-        </a>
+        </Link>
 
         {/* Center: Links - absolutely positioned for true centering */}
         <div className="hidden md:flex items-center gap-0.5 absolute left-1/2 -translate-x-1/2">
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="px-3 py-1.5 text-[13px] text-secondary hover:text-primary transition-colors rounded-md hover:bg-white/5"
-            >
-              {link.label}
-            </a>
-          ))}
+          {NAV_LINKS.map((link) => {
+            const className = "px-3 py-1.5 text-[13px] text-secondary hover:text-primary transition-colors rounded-md hover:bg-white/5";
+            if (link.type === 'route') {
+              return (
+                <Link key={link.label} to={link.href} className={className}>
+                  {link.label}
+                </Link>
+              );
+            }
+            if (link.type === 'external') {
+              return (
+                <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" className={className}>
+                  {link.label}
+                </a>
+              );
+            }
+            return (
+              <a
+                key={link.label}
+                href={link.href}
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.querySelector(link.href)?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className={className}
+              >
+                {link.label}
+              </a>
+            );
+          })}
         </div>
 
         {/* Right: Login + Connect GitHub */}

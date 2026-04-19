@@ -93,7 +93,7 @@ export function Sidebar({ isCollapsed, setIsCollapsed, installState }) {
             <ChevronRight className="w-4 h-4" />
           </button>
         ) : (
-          <a href="#" className="flex w-full items-center justify-between px-3 py-2 rounded-lg border border-amber-500/20 dark:border-amber-500/50 bg-amber-50 dark:bg-amber-500/5 hover:bg-amber-100 dark:hover:bg-amber-500/10 hover:border-amber-500/40 dark:hover:border-amber-500/60 shadow-[0_0_12px_rgba(245,158,11,0.05)] dark:shadow-[0_0_12px_rgba(245,158,11,0.1)] hover:shadow-[0_0_16px_rgba(245,158,11,0.1)] dark:hover:shadow-[0_0_16px_rgba(245,158,11,0.2)] transition-all duration-300 group overflow-hidden">
+          <a href="https://github.com/ArchieTansworthy/dura#readme" target="_blank" rel="noopener noreferrer" className="flex w-full items-center justify-between px-3 py-2 rounded-lg border border-amber-500/20 dark:border-amber-500/50 bg-amber-50 dark:bg-amber-500/5 hover:bg-amber-100 dark:hover:bg-amber-500/10 hover:border-amber-500/40 dark:hover:border-amber-500/60 shadow-[0_0_12px_rgba(245,158,11,0.05)] dark:shadow-[0_0_12px_rgba(245,158,11,0.1)] hover:shadow-[0_0_16px_rgba(245,158,11,0.1)] dark:hover:shadow-[0_0_16px_rgba(245,158,11,0.2)] transition-all duration-300 group overflow-hidden">
             <Typewriter
               text="get dura in cli and mcp"
               speed={40}

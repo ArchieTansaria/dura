@@ -27,7 +27,9 @@ export function CtaSection() {
           
           {/* Secondary CTA */}
           <a
-            href="#"
+            href="https://www.npmjs.com/package/dura-kit"
+            target="_blank"
+            rel="noopener noreferrer"
             className="group relative flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-4 bg-white/5 border border-white/10 text-white font-medium rounded-full hover:bg-white/10 hover:-translate-y-0.5 transition-all duration-300"
           >
             <Terminal size={16} className="text-secondary group-hover:text-white transition-colors" />
