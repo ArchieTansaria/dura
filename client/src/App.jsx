@@ -4,6 +4,7 @@ import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import RepoDetail from './pages/RepoDetail';
 import Settings from './pages/Settings';
+import SystemStatus from './pages/SystemStatus';
 import { ThemeProvider } from './contexts/ThemeContext';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
         <Route path="/repo/:owner/:name" element={<RepoDetail />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/account" element={<Settings />} />
+        <Route path="/status" element={<SystemStatus />} />
       </Routes>
     </ThemeProvider>
   );
