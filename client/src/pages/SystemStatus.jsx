@@ -82,15 +82,6 @@ function StatusCard({ service }) {
 
   return (
     <div className="group relative bg-white/[0.02] border border-white/5 rounded-2xl p-6 backdrop-blur-sm hover:bg-white/[0.04] hover:border-white/10 transition-all duration-500 shadow-xl shadow-black/20">
-      {/* Subtle top accent line */}
-      <div className={cn(
-        "absolute top-0 left-6 right-6 h-px transition-opacity duration-500",
-        service.status === 'operational' && "bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent",
-        service.status === 'standby' && "bg-gradient-to-r from-transparent via-amber-400/40 to-transparent",
-        service.status === 'degraded' && "bg-gradient-to-r from-transparent via-orange-500/40 to-transparent",
-        service.status === 'down' && "bg-gradient-to-r from-transparent via-red-500/40 to-transparent",
-      )} />
-
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center group-hover:bg-white/[0.08] transition-colors duration-300">
