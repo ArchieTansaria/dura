@@ -26,7 +26,8 @@
     "express-session": "^1.19.0",
     "ioredis": "^5.9.3",
     "mongoose": "^9.2.1",
-    "redis": "^5.11.0"
+    "redis": "^5.11.0",
+    "morgan": "^1.10.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
@@ -34,7 +35,6 @@
     "@types/express-session": "^1.18.2",
     "@types/morgan": "^1.9.10",
     "@types/node": "^25.2.3",
-    "morgan": "^1.10.1",
     "nodemon": "^3.1.11",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"

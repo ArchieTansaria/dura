@@ -30,4 +30,4 @@ COPY --from=builder /app/dist ./dist
 USER node
 
 # Default command starts the API
-CMD ["npm", "start"]
+CMD ["node", "dist/app.js"]

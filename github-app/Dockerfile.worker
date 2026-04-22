@@ -26,4 +26,4 @@ RUN npm ci --omit=dev
 COPY --from=builder /app/dist ./dist
 
 # Start the worker queue
-CMD ["npm", "run", "start:worker"]
+CMD ["node", "dist/workers/index.js"]
