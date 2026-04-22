@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const STATUS_DOT_COLORS = {
   operational: 'bg-emerald-400',
-  standby: 'bg-amber-400',
+  standby: 'bg-accent',
   degraded: 'bg-orange-500',
   down: 'bg-red-500',
 };

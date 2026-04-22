@@ -28,9 +28,9 @@ const STATUS_CONFIG = {
   },
   standby: {
     label: 'Standby',
-    dotClass: 'bg-amber-400',
-    pillBg: 'bg-amber-400/10 border-amber-400/20 text-amber-400',
-    glow: 'shadow-[0_0_12px_rgba(251,191,36,0.3)]',
+    dotClass: 'bg-accent',
+    pillBg: 'bg-accent/10 border-accent/20 text-accent',
+    glow: 'shadow-[0_0_12px_rgba(245,158,11,0.3)]',
   },
   degraded: {
     label: 'Degraded',
@@ -199,7 +199,7 @@ export default function SystemStatus() {
               )}
             </div>
             <p className="text-[15px] text-secondary leading-relaxed max-w-lg">
-              Real-time health of the Dura infrastructure. Services are hosted on AWS ECS Fargate with Upstash Redis for queuing.
+              Real-time health of the Dura infrastructure. Backend services are hosted on AWS ECS Fargate with Redis on Elasticache for session management and queuing.
             </p>
           </div>
 
@@ -248,24 +248,24 @@ export default function SystemStatus() {
 
           {/* Standby explainer */}
           {!loading && services.some((s) => s.status === 'standby') && (
-            <div className="mt-8 flex items-start gap-3 p-4 rounded-xl border border-amber-400/10 bg-amber-400/[0.03]">
-              <Info className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
+            <div className="mt-8 flex items-start gap-3 p-4 rounded-xl border border-accent/10 bg-accent/[0.03]">
+              <Info className="w-4 h-4 text-accent mt-0.5 shrink-0" />
               <div>
-                <p className="text-[13px] text-amber-200/80 font-medium mb-1">Why is a service in Standby?</p>
+                <p className="text-[13px] text-accent/80 font-medium mb-1">Why is a service in Standby?</p>
                 <p className="text-[12px] text-secondary leading-relaxed">
-                  Services in Standby have been intentionally scaled to zero as a cost-saving measure. This is normal for a portfolio project — the service will automatically spin up within ~60 seconds when a request is made.
+                  Services in Standby have been intentionally scaled to zero as a cost-saving measure. The service will automatically spin up within ~60 seconds when a request is made.
                 </p>
               </div>
             </div>
           )}
 
           {/* Architecture note */}
-          <div className="mt-6 flex items-start gap-3 p-4 rounded-xl border border-white/5 bg-white/[0.02]">
+          {/* <div className="mt-6 flex items-start gap-3 p-4 rounded-xl border border-white/5 bg-white/[0.02]">
             <ExternalLink className="w-4 h-4 text-secondary/50 mt-0.5 shrink-0" />
             <p className="text-[12px] text-secondary/60 leading-relaxed">
-              Infrastructure: <span className="text-secondary">AWS ECS Fargate</span> (compute) · <span className="text-secondary">Upstash Redis</span> (queue) · <span className="text-secondary">MongoDB Atlas</span> (database) · <span className="text-secondary">Vercel</span> (frontend)
+              Infrastructure: <span className="text-secondary">AWS ECS Fargate</span> (compute) · <span className="text-secondary">Redis on Elasticache</span> (session management and queue) · <span className="text-secondary">MongoDB Atlas</span> (database) · <span className="text-secondary">Vercel</span> (frontend)
             </p>
-          </div>
+          </div> */}
         </div>
       </main>
 

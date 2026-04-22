@@ -155,7 +155,7 @@ export default async function handler(req, res) {
 
     if (redisRes.ok) {
       services.push({
-        name: 'Redis (Upstash)',
+        name: 'Redis (Elasticache)',
         id: 'upstash-redis',
         status: 'operational',
         description: 'Connected and responding to pings.',
@@ -167,10 +167,10 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Redis ping failed:', error.message);
     services.push({
-      name: 'Redis (Upstash)',
+      name: 'Redis (Elasticache)',
       id: 'upstash-redis',
       status: 'down',
-      description: error.message || 'Unable to reach Upstash Redis.',
+      description: error.message || 'Unable to reach Elasticache Redis.',
     });
   }
 
