@@ -59,7 +59,7 @@ export const triggerScan = async (req: Request, res: Response) => {
         branch: lastAnalysis.branch || 'main',
         trigger: 'manual'
       },
-      { attempts: 3, backoff: { type: "exponential", delay: 5000 }, removeOnComplete: true }
+      { attempts: 3, backoff: { type: "exponential", delay: 5000 } }
     );
 
     return res.status(202).json({ message: "Scan queued successfully" });

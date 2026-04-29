@@ -29,7 +29,7 @@ export const handleInstallationEvent = async ({ payload }: any) => {
             branch: repo.default_branch || 'main',
             trigger: 'initial_installation' 
           },
-          { attempts: 3, backoff: { type: "exponential", delay: 5000 }, removeOnComplete: true }
+          { attempts: 3, backoff: { type: "exponential", delay: 5000 } }
         );
       }
     } catch (error) {

@@ -35,7 +35,6 @@ export const handlePullRequestEvent = async ({ payload }: any) => {
             type: "exponential",
             delay: 5000,
           },
-          removeOnComplete: true,
       }
     )
     

@@ -42,6 +42,9 @@ const prAnalysisWorker = new Worker('prAnalysisQueue', async (job: Job) => {
 }, 
 {
   connection: redisConnection,
-  concurrency: 2
+  concurrency: 2,
+  drainDelay: 10,
+  lockDuration: 60000,
+  stalledInterval: 300000
 })
 

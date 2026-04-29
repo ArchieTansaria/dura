@@ -30,7 +30,6 @@ export const handlePushEvent = async ({ payload }: any) => {
       { 
         attempts : 3, 
         backoff: { type: "exponential", delay: 5000 },
-        removeOnComplete: true,
       }
     )
     
