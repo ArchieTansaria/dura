@@ -2,7 +2,7 @@ import { ECSClient, DescribeServicesCommand } from '@aws-sdk/client-ecs';
 
 /**
  * Vercel Serverless Function: /api/status
- * Queries AWS ECS for service health and pings Upstash Redis.
+ * Queries AWS ECS for service health and pings Redis on ElastiCache.
  */
 export default async function handler(req, res) {
   // CORS headers for safety
@@ -137,7 +137,7 @@ export default async function handler(req, res) {
     }
   }
 
-  // --- 2. Ping Upstash Redis ---
+  // --- 2. Ping Redis on ElastiCache ---
   try {
     const restUrl = process.env.UPSTASH_REDIS_REST_URL;
     const restToken = process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -156,7 +156,7 @@ export default async function handler(req, res) {
     if (redisRes.ok) {
       services.push({
         name: 'Redis (Elasticache)',
-        id: 'upstash-redis',
+        id: 'elasticache-redis',
         status: 'operational',
         description: 'Connected and responding to pings.',
       });
@@ -168,7 +168,7 @@ export default async function handler(req, res) {
     console.error('Redis ping failed:', error.message);
     services.push({
       name: 'Redis (Elasticache)',
-      id: 'upstash-redis',
+      id: 'elasticache-redis',
       status: 'down',
       description: error.message || 'Unable to reach Elasticache Redis.',
     });

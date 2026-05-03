@@ -16,7 +16,7 @@ import {
 const SERVICE_ICONS = {
   'dura-api-service': Server,
   'dura-worker-service': Cpu,
-  'upstash-redis': Database,
+  'elasticache-redis': Database,
 };
 
 const STATUS_CONFIG = {
