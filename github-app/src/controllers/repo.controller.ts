@@ -1,6 +1,10 @@
 import { Request, Response } from 'express'
 import { Analysis } from '../models/Analysis.model.js'
 import { AnalysisQueue } from '../queues/analysisQueue.js'
+import { ECSClient, UpdateServiceCommand } from "@aws-sdk/client-ecs";
+import { getEnv } from "../utils/envValidator.js";
+
+const ecsClient = new ECSClient({ region: process.env.AWS_REGION || "us-east-1" });
 
 export const getRepoAnalysis = async (req: Request, res: Response) => {
   try {
@@ -61,6 +65,22 @@ export const triggerScan = async (req: Request, res: Response) => {
       },
       { attempts: 3, backoff: { type: "exponential", delay: 5000 } }
     );
+
+    // Wake up the worker
+    try {
+      const cluster = getEnv("ECS_CLUSTER_NAME");
+      const service = getEnv("ECS_WORKER_SERVICE_NAME");
+      await ecsClient.send(new UpdateServiceCommand({
+        cluster,
+        service,
+        desiredCount: 1
+      }));
+      console.log(`[manual.trigger] Waking up worker service: ${service}`);
+    } catch (ecsError) {
+      console.error("[manual.trigger] Failed to wake up worker:", ecsError);
+      // We don't fail the request if ECS wake-up fails, as the job is already in Redis 
+      // and might be picked up if the worker is already running or scaled by other means.
+    }
 
     return res.status(202).json({ message: "Scan queued successfully" });
 
