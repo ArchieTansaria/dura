@@ -13,6 +13,7 @@ export const handlePullRequestEvent = async ({ payload }: any) => {
     const installationId = payload.installation.id
     const prNumber = payload.pull_request.number
     const repo = payload.repository.full_name
+    const repoId = payload.repository.id
     const prTitle = payload.pull_request.title
     const branch = payload.pull_request.head.ref
   
@@ -28,7 +29,7 @@ export const handlePullRequestEvent = async ({ payload }: any) => {
     //add job to queue
     await prAnalysisQueue.add(
       'analyze-pr',
-      { installationId, repo, prNumber, prTitle, branch }, 
+      { installationId, repo, repoId, prNumber, prTitle, branch }, 
       { 
         attempts : 3, 
           backoff: {
