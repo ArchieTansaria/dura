@@ -119,3 +119,6 @@ const resetTimer = () => {
 
 prAnalysisWorker.on('active', resetTimer);
 analysisWorker.on('active', resetTimer);
+
+// Initial check on startup
+checkIdleAndTerminate();
