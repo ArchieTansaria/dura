@@ -12,7 +12,7 @@ const NAV_LINKS = [
   { label: 'Features', href: '#features', type: 'anchor' },
   { label: 'Docs', href: 'https://github.com/ArchieTansaria/dura#readme', type: 'external' },
   { label: 'Dashboard', href: '/dashboard', type: 'route' },
-  { label: 'Contact', href: '#footer', type: 'anchor' },
+  { label: 'Contact', href: 'mailto:archietans.work@gmail.com', type: 'external' },
 ];
 
 const STATUS_DOT_COLORS = {

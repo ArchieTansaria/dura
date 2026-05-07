@@ -18,7 +18,7 @@ export function CtaSection() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
           {/* Primary CTA */}
           <a
-            href="https://github.com/apps/dura-dep"
+            href={`${import.meta.env.VITE_BACKEND_URL}/connect/github`}
             className="group relative flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-4 bg-white text-black font-semibold rounded-full hover:-translate-y-0.5 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]"
           >
             <Github size={18} />

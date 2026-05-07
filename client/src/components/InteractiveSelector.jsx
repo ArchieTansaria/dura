@@ -23,7 +23,7 @@ const OPTIONS = [
     isList: true,
     buttonLabel: 'Connect GitHub',
     buttonIcon: Github,
-    buttonHref: 'https://github.com/apps/dura-dep',
+    buttonHref: `${import.meta.env.VITE_BACKEND_URL}/connect/github`,
     buttonAction: 'link'
   },
   {
@@ -55,7 +55,7 @@ const OPTIONS = [
     description: 'Expose dura\'s dependency analysis to IDEs and AI agents via MCP and get structured risk report.',
     buttonLabel: 'View MCP setup',
     buttonIcon: ExternalLink,
-    buttonHref: '#',
+    buttonHref: 'https://github.com/ArchieTansaria/dura/tree/main/mcp#readme',
     buttonAction: 'link',
     hasUsage: true
   },
@@ -72,7 +72,7 @@ const OPTIONS = [
     isList: true,
     buttonLabel: 'Run actor',
     buttonIcon: ExternalLink,
-    buttonHref: 'https://console.apify.com/',
+    buttonHref: 'https://apify.com/artistic_seal/dura/api',
     buttonAction: 'link'
   }
 ];
