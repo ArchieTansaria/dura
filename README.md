@@ -1,7 +1,19 @@
-# DURA - Dependency Update Risk Analyzer
+<div align="center">
+  <img src="./client/public/favicon.svg" alt="DURA Logo" width="120" height="120" />
 
-![DURA Ecosystem](https://img.shields.io/badge/Ecosystem-CLI%20%7C%20GitHub%20App%20%7C%20MCP-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
+  <br>
+
+  <h1>DURA</h1>
+  <p><strong>Dependency Update Risk Analyzer</strong></p>
+
+  <p>
+    <img src="https://img.shields.io/badge/Ecosystem-CLI%20%7C%20GitHub%20App%20%7C%20MCP-black?style=for-the-badge" alt="Ecosystem" />
+    <img src="https://img.shields.io/badge/npm-v2.0.1-blue?style=for-the-badge&logo=npm" alt="NPM Version" />
+    <img src="https://img.shields.io/badge/License-MIT-success?style=for-the-badge" alt="License" />
+  </p>
+</div>
+
+<br/>
 
 Analyze dependency update risks in your projects and make informed decisions about which dependencies are safe to update. 
 
