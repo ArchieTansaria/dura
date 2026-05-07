@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./client/public/favicon.svg" alt="DURA Logo" width="120" height="120" />
+  <img src="./client/public/favicon.svg" alt="DURA Logo" width="100" height="100" />
 
   <br>
 
