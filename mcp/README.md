@@ -1,35 +1,54 @@
-# DURA MCP Server
+# DURA MCP Server (`dura-mcp`)
 
-MCP (Model Context Protocol) server for [DURA](https://github.com/ArchieTansaria/dura) – Dependency Update Risk Analyzer. [modelcontextprotocol](https://modelcontextprotocol.io/docs/learn/server-concepts)
+The Model Context Protocol (MCP) server for DURA. This tool exposes DURA's powerful dependency analysis engine directly to AI coding agents, allowing them to contextually understand the risks of updating dependencies *before* they write the code to do it.
 
-Integrates DURA's dependency analysis capabilities with AI coding assistants (Cline, Cursor, Claude Code, Continue.dev, etc.) and desktop apps like Claude Desktop that support MCP servers. [modelcontextprotocol](https://modelcontextprotocol.io/clients)
+## Quick Setup
 
-***
+The easiest and most reliable way to provide DURA capabilities to your AI agent is via Docker or NPX.
 
-## Quick Start
+Add one of the following to your agent's MCP configuration settings (usually `mcp_settings.json` or similar):
 
-### 1. Installation
-
-```bash
-# Global install (recommended)
-npm install -g dura-mcp
-
-# Or use npx (no install needed)
-npx dura-mcp
-```
-
-The MCP server internally uses `dura-kit` to perform dependency analysis. [github](https://github.com/ArchieTansaria/dura)
-
-### 2. Generic MCP Configuration (All Major Clients)
-
-Add this entry to your AI agent’s MCP configuration (the exact file/setting path differs per client, but the JSON structure is the same): [modelcontextprotocol](https://modelcontextprotocol.io/docs/learn/server-concepts)
+### Option 1: Docker (Recommended)
 
 ```json
 {
   "mcpServers": {
-    "dura": {
+    "dura-mcp": {
+      "disabled": false,
+      "timeout": 300,
+      "type": "stdio",
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "--tty=false",
+        "archietans/dura-mcp:latest"
+      ],
+      "autoApprove": [],
+      "cwd": "${workspaceFolder}"
+    }
+  }
+}
+```
+
+### Option 2: NPX (No Docker Required)
+
+If you have Node.js installed but not Docker, you can run the server directly via `npx`:
+
+```json
+{
+  "mcpServers": {
+    "dura-mcp": {
+      "disabled": false,
+      "timeout": 300,
+      "type": "stdio",
       "command": "npx",
-      "args": ["dura-mcp"],
+      "args": [
+        "-y",
+        "dura-mcp@latest"
+      ],
+      "autoApprove": [],
       "cwd": "${workspaceFolder}"
     }
   }
@@ -42,9 +61,9 @@ This pattern works for:
 - Cursor
 - Claude Desktop / Claude Code
 - Continue.dev
-- Other MCP-compatible IDE and desktop clients that accept an `mcpServers` JSON block. [airbyte](https://airbyte.com/blog/pyairbyte-mcp-now-supports-cline-cursor-claude-desktop-warp)
+- Other MCP-compatible IDE and desktop clients that accept an `mcpServers` JSON block. [modelcontextprotocol](https://modelcontextprotocol.io/clients)
 
-`cwd` is set to `${workspaceFolder}` so the server runs relative to your current project and can resolve local dependencies or configuration correctly. [github](https://github.com/ArchieTansaria/dura)
+`cwd` is set to `${workspaceFolder}` so the server runs relative to your current project and can resolve local dependencies or configuration correctly.
 
 | Client | Config Location |
 |--------|-----------------|
@@ -60,7 +79,7 @@ This pattern works for:
 
 ## Configuration Fallbacks
 
-If `npx dura-mcp` does not work in your environment, you can fall back to local or absolute paths as needed. [zuplo](https://zuplo.com/blog/mcp-resources)
+If `docker` does not work in your environment, you can fall back to local or absolute paths as needed.
 
 ### Option A: Local Project Install
 
@@ -102,7 +121,7 @@ Useful for global or non-standard installs:
 
 ### Option C: Global Binary
 
-If `npm install -g dura-mcp` is used and `dura-mcp` is on your PATH: [github](https://github.com/ArchieTansaria/dura)
+If `npm install -g dura-mcp` is used and `dura-mcp` is on your PATH: 
 
 ```json
 {
@@ -131,13 +150,13 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | npx dura-mcp
 echo '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"get_risk_summary","arguments":{"repoUrl":"https://github.com/expressjs/express"}}}' | npx dura-mcp
 ```
 
-If everything is wired correctly, you should see a JSON response listing four tools on `tools/list` and a structured result for `get_risk_summary` rather than an internal error. [github](https://github.com/ArchieTansaria/dura)
+If everything is wired correctly, you should see a JSON response listing four tools on `tools/list` and a structured result for `get_risk_summary` rather than an internal error.
 
 ***
 
 ## Available Tools
 
-The DURA MCP server provides four tools for dependency risk analysis. [github](https://github.com/ArchieTansaria/dura)
+The DURA MCP server provides four tools for dependency risk analysis. 
 
 ### 1. `analyze_repository`
 
@@ -206,7 +225,7 @@ Lightweight health check and risk overview.
 
 ## Typical AI Usage Patterns
 
-These examples illustrate how AI assistants tend to use the tools; they are not strict requirements: [github](https://github.com/ArchieTansaria/dura)
+These examples illustrate how AI assistants tend to use the tools; they are not strict requirements: 
 
 - Quick check:  
   “Is it safe to update my dependencies?” → `get_risk_summary`
@@ -224,7 +243,7 @@ These examples illustrate how AI assistants tend to use the tools; they are not 
 1. The AI assistant receives a dependency-related question.
 2. The MCP client lists available tools from the DURA MCP server.
 3. The AI chooses the appropriate tool (full analysis, high-risk only, breaking changes, or summary).
-4. The MCP server runs the `dura-kit` CLI to analyze the target repository. [github](https://github.com/ArchieTansaria/dura)
+4. The MCP server runs the `dura-kit` CLI to analyze the target repository. [github](https://github.com/ArchieTansaria/dura/tree/main/cli)
 5. Results are normalized into structured JSON and returned via MCP.
 6. The AI formats the findings into natural language and follow-up recommendations.
 
@@ -232,14 +251,14 @@ These examples illustrate how AI assistants tend to use the tools; they are not 
 
 ## Caching Behavior
 
-The MCP server caches repository analyses for one hour: [github](https://github.com/ArchieTansaria/dura)
+The MCP server caches repository analyses for one hour: 
 
 - First query: Fetches fresh data, typically a few seconds.
 - Repeated queries: Served from cache for the same repository and branch.
 - Cache expiry: After one hour, the next call re-runs analysis.
 - Manual refresh: Set `useCache: false` for `analyze_repository` to force a fresh run.
 
-Cache is shared across tools, so one full analysis speeds up subsequent summary or filtered calls for the same repository. [github](https://github.com/ArchieTansaria/dura)
+Cache is shared across tools, so one full analysis speeds up subsequent summary or filtered calls for the same repository. 
 
 ***
 
@@ -247,38 +266,48 @@ Cache is shared across tools, so one full analysis speeds up subsequent summary 
 
 - Node.js 18.0.0 or higher
 - Internet access (GitHub and npm APIs)
-- Currently supports public GitHub repositories with a `package.json` in the root directory [github](https://github.com/ArchieTansaria/dura)
+- Currently supports public GitHub repositories with a `package.json` in the root directory.
 
 ***
 
 ## Troubleshooting
 
-### Command Not Found: `dura-mcp`
+### Docker: Cannot Connect / Daemon Not Running
+
+If your MCP client fails to initialize the server and you are using the Docker setup:
+- **Ensure Docker Desktop is running**: The Docker daemon must be active in the background.
+- **Test manually**: Open a terminal and run `docker run --rm -i archietans/dura-mcp:latest`. If Docker is not running, it will give you an explicit error.
+- **Pull the image manually**: Sometimes clients fail silently if they time out while pulling a new image. Run `docker pull archietans/dura-mcp:latest` to ensure you have the image downloaded.
+
+### NPX/Node: Command Not Found: `dura-mcp`
+
+If you are using the NPX or global install method and the client cannot find the command:
 
 ```bash
 npm install -g dura-mcp
 which dura-mcp
 ```
 
-Ensure the printed path is on your `PATH` and update your configuration to use either `dura-mcp` (global) or `npx dura-mcp` as described above. [github](https://github.com/ArchieTansaria/dura)
+Ensure the printed path is on your `PATH` and update your configuration to use either `dura-mcp` (global) or `npx dura-mcp` as described above. 
 
 ### MCP Client Does Not Show Tools
 
 - Confirm your config uses one of the working patterns above (especially `cwd`).
 - Restart the client fully after editing MCP config.
-- Open the client’s developer tools/console and check for spawn errors or path issues. [docs.cline](https://docs.cline.bot/mcp/configuring-mcp-servers)
+- Open the client’s developer tools/console and check for spawn errors or path issues.
 
 ### Server Runs But Calls Fail
 
-- Run `echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | npx dura-mcp` from the same directory as `cwd`.
-- If this fails, adjust `cwd` and `args` until terminal tests succeed, then mirror that in your MCP config. [modelcontextprotocol](https://modelcontextprotocol.io/specification/draft/server/resources)
+- **For NPX:** Run `echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | npx dura-mcp`
+- **For Docker:** Run `echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | docker run --rm -i archietans/dura-mcp:latest`
+- If this terminal test fails, adjust `cwd` and `args` until terminal tests succeed, then mirror that in your MCP config.
 
 ### Analysis Errors
 
 - Verify the repository URL is public and valid.
 - Ensure the repo contains `package.json` at the root.
 - Test the underlying CLI directly:  
-  `npx dura-kit https://github.com/owner/repo` [github](https://github.com/ArchieTansaria/dura)
+  `npx dura-kit https://github.com/owner/repo` 
 
 ***
 
@@ -293,7 +322,7 @@ npm install
 node server.js
 ```
 
-The server starts and waits for MCP JSON-RPC messages on stdin. [github](https://github.com/ArchieTansaria/dura)
+The server starts and waits for MCP JSON-RPC messages on stdin.
 
 ### Testing with MCP Inspector
 
@@ -313,24 +342,9 @@ npm link
 # Then in your MCP client config:
 {
   "mcpServers": {
-    "dura": {
+    "dura-mcp": {
       "command": "dura-mcp"
     }
   }
 }
 ```
-
-***
-
-## Links
-
-- DURA CLI: [dura-kit on npm](https://www.npmjs.com/package/dura-kit)
-- GitHub Repository: [ArchieTansaria/dura](https://github.com/ArchieTansaria/dura)
-- MCP Documentation: [Model Context Protocol](https://modelcontextprotocol.io)
-- Issues: [GitHub Issues](https://github.com/ArchieTansaria/dura/issues)
-
-***
-
-## License
-
-MIT License – see the [LICENSE](https://github.com/ArchieTansaria/dura/blob/main/LICENSE) file for details.

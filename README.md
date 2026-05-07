@@ -1,351 +1,155 @@
 # DURA - Dependency Update Risk Analyzer
 
-Analyze dependency update risks in your projects and make informed decisions about which dependencies are safe to update.
+![DURA Ecosystem](https://img.shields.io/badge/Ecosystem-CLI%20%7C%20GitHub%20App%20%7C%20MCP-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-## Installation
+Analyze dependency update risks in your projects and make informed decisions about which dependencies are safe to update. 
 
-### NPX (No Installation Required)
+DURA is a comprehensive ecosystem designed to help developers update NPM packages safely by analyzing GitHub releases, changelogs, and version diffs to calculate a deterministic "Risk Score" for every update.
+
+---
+
+## The DURA Ecosystem
+
+DURA is accessible through three main interfaces, depending on your workflow:
+
+1. **[DURA CLI (`dura-kit`)](#1-dura-cli-dura-kit)**: For terminal usage and local scripting.
+2. **[DURA GitHub App](#2-dura-github-app-client--backend)**: For automated CI/CD PR comments and a unified web dashboard.
+3. **[DURA MCP Server (`dura-mcp`)](#3-dura-mcp-server)**: For integrating DURA directly into AI coding agents.
+
+---
+
+## 1. DURA CLI (`dura-kit`)
+
+The core engine of DURA is available as a standalone CLI tool. It requires no installation to try.
+
+### Usage
+
 ```bash
+# Analyze a repository instantly
 npx dura-kit https://github.com/facebook/react
-```
 
-### Global Installation
-```bash
+# Or install globally
 npm install -g dura-kit
-dura https://github.com/facebook/react
-```
-
-### Local Installation
-```bash
-npm install --save-dev dura-kit
-npx dura https://github.com/facebook/react
-```
-
-## Usage
-
-### Basic Usage
-```bash
-# Analyze a repository
-dura <github-repo-url> [branch] [options]
-
-# Examples
 dura https://github.com/expressjs/express
-dura https://github.com/expressjs/express develop
-dura https://github.com/facebook/react main
 ```
 
 ### Output Formats
+The CLI supports multiple output formats for easy reading or machine parsing:
+- `--summary` (Default): Concise summary of high-risk and breaking changes.
+- `--table`: Displays all dependencies in a detailed table format.
+- `--json`: Outputs machine-readable JSON for CI integration.
 
-#### Summary (Default)
-```bash
-dura https://github.com/expressjs/express
+> **For detailed usage, options, and programmatic API access, please read the [DURA CLI Documentation](cli/README.md).**
+
+---
+
+## 2. DURA GitHub App (Client & Backend)
+
+The DURA GitHub App automates dependency analysis for your repositories. It runs automatically on pull requests, pushes, and installations, posting comments directly on PRs and displaying historical data on a unified web dashboard.
+
+### Architecture Overview
+
+To maintain a highly available but cost-effective infrastructure, the DURA backend utilizes a custom **Event-Driven, Scale-to-Zero Architecture** hosted on AWS.
+
+**Request Flow:**
+1. **GitHub Webhooks** trigger an **AWS Lambda (Proxy)**.
+2. The Lambda forwards the payload to the **API Service** and simultaneously wakes up the **Worker Service**.
+3. The API Service adds the analysis job to **Redis (BullMQ)**.
+4. The Worker Service processes the job from Redis and saves results to **MongoDB**.
+5. After 10 minutes of inactivity, the Worker Service programmatically scales itself back down to 0.
+
+### Components
+- **Frontend (`/client`)**: A modern Next.js/React application providing a premium glassmorphic dashboard to view repository health, risks, and historical scans.
+- **Backend API (`/github-app`)**: An Express API running continuously on AWS ECS Fargate Spot instances. It handles authentication and serves data to the frontend.
+- **Scale-to-Zero Worker (`/github-app/src/workers`)**: The heavy lifting (web scraping, dependency analysis) is done by a BullMQ worker.
+  - **AWS Lambda Router (`/lambda/webhook-router`)**: To save costs, the Worker service scales to zero when inactive. GitHub webhooks hit a fast AWS Lambda function first.
+  - **Self-Termination**: After processing all jobs, the Worker monitors the Redis queue. If the queue remains completely drained for 10 minutes, the Worker calls the AWS SDK to set its own `desiredCount` to 0.
+
+> **For detailed setup, environment variables, and deployment instructions, please read the [DURA GitHub App Documentation](github-app/README.md).**
+
+---
+
+## 3. DURA MCP Server
+
+DURA integrates seamlessly with AI coding agents via the Model Context Protocol (MCP). This allows your AI agents to natively understand the risk of updating a dependency within their context window before writing any code.
+
+### Configuration Setup
+
+You can provide DURA capabilities to any MCP-compatible AI agent by adding the following to your agent's MCP configuration settings (usually `mcp_settings.json` or similar):
+
+```json
+{
+  "mcpServers": {
+    "dura-mcp": {
+      "disabled": false,
+      "timeout": 300,
+      "type": "stdio",
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "--tty=false",
+        "archietans/dura-mcp:latest"
+      ],
+      "autoApprove": []
+    }
+  }
+}
 ```
 
-Shows a concise summary of high-risk and breaking changes.
+Now you can prompt your AI agent: *"Analyze dependencies for https://github.com/expressjs/express and update the low-risk ones."*
 
-#### Table Format
-```bash
-dura https://github.com/expressjs/express --table
-```
+> **For detailed tool definitions and prompt examples, please read the [DURA MCP Server Documentation](mcp/README.md).**
 
-Displays all dependencies in a detailed table format with risk scores.
-
-#### JSON Format
-```bash
-dura https://github.com/expressjs/express --json
-```
-
-Outputs machine-readable JSON for integration with other tools.
-
-#### Combined Formats
-```bash
-dura https://github.com/expressjs/express --json --table
-dura https://github.com/expressjs/express --table --summary
-```
-
-All flags are additive and can be combined.
-
-### Debug Options
-
-#### Verbose Mode
-```bash
-dura https://github.com/expressjs/express --verbose
-```
-
-Shows detailed progress information and warnings.
-
-#### Debug Mode
-```bash
-dura https://github.com/expressjs/express --debug
-```
-
-Enables comprehensive debug logging including network requests and internal processing details.
+---
 
 ## Understanding Risk Levels
 
-DURA categorizes dependency updates into three risk levels:
+DURA categorizes dependency updates into three risk levels by calculating a comprehensive **Risk Score (0-100)**:
 
-### High Risk
-
+### High Risk (Score: 51-100)
 - Major version updates (breaking changes)
 - Known security vulnerabilities
 - Deprecated packages
-- Significant API changes
+- Confirmed breaking changes via GitHub Release scraping
 
-**Recommendation**: Review migration guides, update tests, and deploy to staging before production.
+### Medium Risk (Score: 16-50)
+- Minor version updates with significant behavior changes
+- "Likely" or "Unknown" breaking changes in changelogs
 
-### Medium Risk
-
-- Minor version updates with behavior changes
-- New features that may affect existing functionality
-- Dependencies with incomplete documentation
-
-**Recommendation**: Review changelogs and test thoroughly.
-
-### Low Risk
-
+### Low Risk (Score: 0-15)
 - Patch updates
 - Bug fixes only
 - Well-maintained dependencies with stable APIs
 
-**Recommendation**: Generally safe to update with standard testing.
+---
 
-## Output Examples
+## Development Setup
 
-### Summary Output
-```
-Confirmed breaking changes (2):
-- merge-descriptors (prod) → confirmed breaking change
-- eslint (dev) → major update with breaking changes
+To run DURA locally:
 
-High-risk updates (3):
-- accepts (prod) → major version gap
-- cookie (prod) → major version gap
-- fresh (prod) → major version gap
-
-Medium-risk updates (4):
-- connect-redis (dev) → major version update
-- marked (dev) → major version update
-```
-
-### Table Output
-```
-+---------------+------+--------------+-----------------+--------+-------+----------------+-----------+-----------+
-| name          | type | currentRange | currentResolved | latest | diff  | breakingSignal | riskScore | riskLevel |
-+---------------+------+--------------+-----------------+--------+-------+----------------+-----------+-----------+
-| express       | prod | ^4.18.2      | 4.18.2          | 5.0.0  | major | confirmed      | 75        | high      |
-| lodash        | prod | ^4.17.20     | 4.17.20         | 4.17.21| patch | unknown        | 5         | low       |
-+---------------+------+--------------+-----------------+--------+-------+----------------+-----------+-----------+
-```
-
-### JSON Output
-```json
-[
-  {
-    "name": "express",
-    "type": "prod",
-    "currentRange": "^4.18.2",
-    "currentResolved": "4.18.2",
-    "latest": "5.0.0",
-    "diff": "major",
-    "breakingChange": {
-      "breaking": "confirmed",
-      "confidenceScore": 0.9,
-      "signals": {
-        "strong": ["Breaking: Removed support for..."],
-        "medium": [],
-        "weak": []
-      }
-    },
-    "riskScore": 75,
-    "riskLevel": "high",
-    "githubRepoUrl": "https://github.com/expressjs/express"
-  }
-]
-```
-
-## Command Reference
-
-### Arguments
-
-- `<repoUrl>` (required) - GitHub repository URL (e.g., https://github.com/expressjs/express)
-- `[branch]` (optional) - Git branch to analyze (default: main)
-
-### Options
-
-- `--json` - Output in JSON format
-- `--table` - Display results in table format
-- `--summary` - Show summary (enabled by default)
-- `--verbose` - Enable verbose logging
-- `--debug` - Enable debug logging
-- `--help` - Display help information
-- `--version` - Display version number
-
-## Use Cases
-
-### Before Updating Dependencies
 ```bash
-# Check what needs attention before running npm update
-dura https://github.com/yourorg/yourproject
-```
-
-### Code Review
-```bash
-# Analyze dependencies changed in a PR
-dura https://github.com/yourorg/yourproject feature-branch
-```
-
-### Security Audits
-```bash
-# Generate a report of all dependency risks
-dura https://github.com/yourorg/yourproject --json > audit-report.json
-```
-
-## How It Works
-
-1. **Fetches Repository Data** - Retrieves package.json and lock files from the specified repository
-2. **Analyzes Dependencies** - Examines both direct and transitive dependencies
-3. **Checks for Updates** - Compares current versions against latest available versions
-4. **Detects Breaking Changes** - Scrapes GitHub releases and changelogs for breaking change indicators
-5. **Calculates Risk Scores** - Assigns risk levels based on version differences, breaking changes, and security issues
-6. **Generates Report** - Provides actionable recommendations for each dependency
-
-## Breaking Change Detection
-
-DURA analyzes GitHub releases and changelogs to detect breaking changes using multiple signals:
-
-- **Strong Signals**: Explicit "BREAKING CHANGE" or "Breaking:" in release notes
-- **Medium Signals**: Major version bumps, API removals, deprecations
-- **Weak Signals**: "may break", "could affect", behavioral changes
-
-Confidence scores range from 0.0 to 1.0, with 0.8+ indicating confirmed breaking changes.
-
-## Risk Score Calculation
-
-Risk scores are calculated based on:
-
-- **Version Difference** (0-40 points)
-  - Same version: 0 points
-  - Patch: 5 points
-  - Minor: 20 points
-  - Major: 40 points
-
-- **Breaking Change Signal** (0-30 points)
-  - Confirmed: 30 points
-  - Likely: 20 points
-  - Unknown: 0 points
-
-- **Security Vulnerabilities** (0-30 points)
-  - Known vulnerabilities: 30 points
-  - No known issues: 0 points
-
-Total scores are mapped to risk levels:
-- **0-15**: Low Risk
-- **16-50**: Medium Risk
-- **51-100**: High Risk
-
-## Limitations
-
-- Requires publicly accessible GitHub repositories
-- Relies on publicly available release notes and changelogs
-- May not detect all breaking changes if not documented
-- Does not analyze code changes directly
-- Network-dependent (requires internet connection)
-
-## Troubleshooting
-
-### "Repository not found"
-
-Ensure the repository URL is correct and publicly accessible. Private repositories are not currently supported.
-
-### "Rate limit exceeded"
-
-GitHub API rate limits may be reached. Wait a few minutes and try again, or use authenticated requests (planned feature).
-
-### "Cannot parse package.json"
-
-Verify the repository contains a valid package.json file in the root or specified branch.
-
-### Slow Analysis
-
-Large repositories with many dependencies may take longer to analyze. Use `--verbose` to see progress.
-
-## Contributing
-
-Contributions are welcome! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### Development Setup
-```bash
-git clone https://github.com/yourorg/dura
+git clone https://github.com/ArchieTansaria/dura.git
 cd dura
+
+# 1. Install dependencies across all workspaces
 npm install
 
-# Link for local development
-cd cli
+# 2. Run the CLI locally
+cd dura-kit
 npm link
-
-# Run locally
 dura https://github.com/facebook/react
-```
-## AI Assistant Integration
 
-DURA integrates seamlessly with Cline and other AI assistants via MCP (Model Context Protocol).
-
-### Quick Setup
-```bash
-# Install MCP server
-npm install -g dura-mcp
-
-# Configure Cline
-# Add to VS Code Settings (JSON):
-{
-  "cline.mcpServers": {
-    "dura": {
-      "command": "dura-mcp"
-    }
-  }
-}
-
-# Restart VS Code
+# 3. Run the GitHub App & Client
+# See github-app/README.md for environment setup
 ```
 
-Now ask Cline: "Analyze dependencies for https://github.com/expressjs/express"
-
-[Read full integration guide →](docs/CLINE_INTEGRATION.md)
+---
 
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
-
-## Links
-
-- [npm Package](https://www.npmjs.com/package/dura-kit)
-- [GitHub Repository](https://github.com/ArchieTansaria/dura)
-- [Issue Tracker](https://github.com/ArchieTansaria/dura/issues)
-- [Changelog](CHANGELOG.md)
-
-## Related Projects
-
-- [CodeRabbit Integration](docs/coderabbit-integration.md) - AI-powered code reviews with DURA
-- [GitHub Actions](docs/github-actions.md) - Automated dependency analysis in CI/CD
-- [MCP Server](docs/mcp-server.md) - Use DURA with Cline CLI
-
-## Credits
-
-Built with:
-- [Commander.js](https://github.com/tj/commander.js) - CLI framework
-- [Crawlee](https://crawlee.dev/) - Web scraping
-- [Playwright](https://playwright.dev/) - Browser automation
-- [Ora](https://github.com/sindresorhus/ora) - Terminal spinners
-- [Chalk](https://github.com/chalk/chalk) - Terminal colors
-
-## Support
-
-For questions, issues, or feature requests:
-- Open an [Issue](https://github.com/ArchieTansaria/dura/issues)
-- Start a [Discussion](https://github.com/ArchieTansaria/dura/discussions)
-- Read the [Documentation](docs/)
-
----
 
 Made with <3 for safer dependency updates.
